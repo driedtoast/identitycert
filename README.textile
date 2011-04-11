@@ -1,0 +1,8 @@
+h1. Overview
+
+Python application to validate a site for the following support:
+* oAuth
+* SAML2
+* JWT
+
+
