@@ -1,0 +1,71 @@
+#!/bin/sh
+#
+# pythonservice     This shell script takes care of starting and stopping
+#               the pythonservice
+#
+# chkconfig: - 85 15
+# description: The pythonservice description 
+# processname: pythonservice
+
+# Source function library
+. /etc/rc.d/init.d/functions
+
+source /etc/profile
+
+SERVICE_NAME="pythonservice"
+PID_FILE="/tmp/$SERVICE_NAME.pid"
+SERVICE_HOME="/opt/$SERVICE_NAME"
+
+PYTHONPATH=$SERVICE_HOME/lib:$PYTHONPATH
+if [ -d "$SERVICE_HOME/third-party/lib/common" ]; then
+   PYTHONPATH=$SERVICE_HOME/third-party/lib/common:$PYTHONPATH 	
+fi 
+if [ -d "$SERVICE_HOME/third-party/lib/site-packages" ]; then
+   PYTHONPATH=$SERVICE_HOME/third-party/lib/site-packages:$PYTHONPATH
+fi 
+
+
+export PYTHONPATH
+
+case "$1" in
+  start)
+    if [ -f $PID_FILE ]; then
+   	echo -n $" $SERVICE_NAME already started: "
+    else 
+   	echo -n $"Starting $SERVICE_NAME daemon: "
+    	echo
+    	python $SERVICE_HOME/startup.py &
+    	echo $! > $PID_FILE
+    	fi
+    	echo
+    ;;
+
+  stop)
+    # Stop daemons.
+    echo -n $"Shutting down $SERVICE_NAME: "
+    PID_NUM=`cat $PID_FILE`
+    echo $" killing pid $PID_NUM"
+    if [ -f $PID_FILE ]; then
+        killproc -p $PID_FILE
+        # kill $PID_NUM
+        rm -f $PID_FILE
+    fi
+    ;;
+  status)
+    if [ -f $PID_FILE ]; then
+    	echo " ON  "  
+    else
+        echo " OFF "
+    fi
+    ;;
+  restart)
+    $0 stop
+    $0 start
+    ;;
+
+  *)
+    echo $"Usage: $0 {start|stop|status|restart}"
+    exit 1
+esac
+
+exit 0

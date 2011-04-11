@@ -1,0 +1,49 @@
+#!/bin/sh
+
+
+
+RUNNING_DIR=`pwd`
+
+if [ ! $BASE_DIR ]; then
+	BASE_DIR=`dirname $0`/..
+	cd $BASE_DIR
+	## just need the hard path
+	BASE_DIR=`pwd`
+
+	## load up sample vars
+fi
+. $BASE_DIR/bin/toasterenv
+
+
+
+CURR_DIR=$RUNNING_DIR
+if [ $2 ] ; then
+	CURR_DIR=$2
+else
+	CURR_DIR=`dirname $0`
+fi
+
+BASE_DIR="$BASE_DIR/$THIRD_PARTY"
+cd $RUNNING_DIR
+
+
+mkdir -p "$BASE_DIR/$SCRIPT_DIR"
+mkdir -p "$BASE_DIR/$DATA_DIR"
+mkdir -p "$BASE_DIR/$LIB_DIR"
+
+
+if [ ! $PYTHONPATH ]; then
+	export PYTHONPATH="$BASE_DIR/$LIB_DIR"
+else
+	export PYTHONPATH="$BASE_DIR/$LIB_DIR:$PYTHONPATH"
+fi
+
+
+cd $1
+
+echo "[install]" >> "setup.cfg"
+echo "install_scripts = $BASE_DIR/$SCRIPT_DIR" >> "setup.cfg"
+echo "install_data = $BASE_DIR/$DATA_DIR" >> "setup.cfg"
+echo "install_lib = $BASE_DIR/$LIB_DIR" >> "setup.cfg"
+
+python setup.py install

@@ -1,0 +1,32 @@
+#!/bin/sh
+#
+
+# Source function library
+
+if [ -f "/etc/rc.d/init.d/functions" ]; then
+  . /etc/rc.d/init.d/functions
+fi
+
+if [ -f "/etc/profile" ]; then
+   source /etc/profile
+fi
+
+SERVICE_NAME=`dirname $0`/..
+PID_FILE="/tmp/$SERVICE_NAME.pid"
+SERVICE_HOME=`dirname $0`/..
+echo $SERVICE_HOME
+
+OLD_PATH=$PYTHONPATH
+NEWPYTHONPATH=$SERVICE_HOME/lib
+if [ -d "$SERVICE_HOME/third-party/lib/common" ]; then
+   NEWPYTHONPATH=$SERVICE_HOME/third-party/lib/common:$NEWPYTHONPATH 	
+fi 
+if [ -d "$SERVICE_HOME/third-party/lib/site-packages" ]; then
+   NEWPYTHONPATH=$SERVICE_HOME/third-party/lib/site-packages:$NEWPYTHONPATH
+fi 
+PYTHONPATH=$NEWPYTHONPATH:$OLD_PATH
+
+
+export PYTHONPATH=$NEWPYTHONPATH:$OLD_PATH
+
+python $1

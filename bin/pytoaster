@@ -1,0 +1,89 @@
+#!/bin/sh
+
+##################################################
+## Main script for setting up environment and such
+##################################################
+
+if [ -f "/etc/rc.d/init.d/functions" ]; then
+   . /etc/rc.d/init.d/functions
+fi
+
+
+BASE_DIR=`dirname $0`/..  
+cd $BASE_DIR
+## just need the hard path
+BASE_DIR=`pwd` 
+
+## load up sample vars
+. $BASE_DIR/bin/toasterenv
+
+### Creates a shell project
+create(){
+	if [ $1 ]; then
+        	echo "Creating new app: $1"
+		mkdir -p "$BASE_DIR/$APP_DIR/$1"
+		mkdir -p "$BASE_DIR/$TESTS_DIR/$1"
+		cp $BASE_DIR/bin/base_application.py $BASE_DIR/$APP_DIR/$1/application.py 
+		cp $BASE_DIR/bin/base_testsuite.py $BASE_DIR/$TESTS_DIR/$1/testsuite.py 
+		## add config?
+		echo "Created app $1 in $BASE_DIR/$APP_DIR/$"
+	else
+	 	echo "No application name provided."
+		echo "Run pytoaster create <appname>"
+	fi
+	
+}
+
+### Cleans dependencies
+clean(){
+ 	echo "Cleaning dependencies"
+	if [ -d "$BASE_DIR/$THIRD_PARTY/$SCRIPT_DIR" ]; then
+		rm -Rf "$BASE_DIR/$THIRD_PARTY/$SCRIPT_DIR"
+		echo " - Removed $BASE_DIR/$THIRD_PARTY/$SCRIPT_DIR"
+	fi 
+	if [ -d "$BASE_DIR/$THIRD_PARTY/$DATA_DIR" ]; then
+		rm -Rf "$BASE_DIR/$THIRD_PARTY/$DATA_DIR"
+		echo " - Removed $BASE_DIR/$THIRD_PARTY/$DATA_DIR"
+	fi
+	if [ -d "$BASE_DIR/$THIRD_PARTY/$LIB_DIR" ]; then
+                rm -Rf "$BASE_DIR/$THIRD_PARTY/$LIB_DIR"
+		echo " - Removed $BASE_DIR/$THIRD_PARTY/$LIB_DIR"
+        fi
+	echo "If you want your dependencies back, run pytoaster resolve"
+}
+
+### Resolves dependencies
+resolve(){
+	echo "Resolving dependencies"
+	. $BASE_DIR/bin/resolvedepends
+	RETVAL=$?
+        echo
+
+}
+
+### Packages up application
+package(){
+	echo "Not implemented yet."
+}
+
+# process options 
+case "$1" in
+  create)
+        create $2
+        ;;
+  resolve)
+        resolve
+        ;;
+  clean)
+        clean
+        ;;
+  package)
+        package
+        ;;
+  *)
+        echo $"Usage: $0 {create|resolve|clean|package}"
+        exit 1
+esac
+
+exit 0
+

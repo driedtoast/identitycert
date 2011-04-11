@@ -1,0 +1,10 @@
+#!/bin/sh
+
+THIRD_PARTY="third-party"
+SCRIPT_DIR="bin"
+DATA_DIR="share"
+LIB_DIR="lib/site-packages"
+APP_DIR="apps"
+TESTS_DIR="tests"
+CONFIG_DIR=conf
+

@@ -5,4 +5,3 @@ Python application to validate a site for the following support:
 * SAML2
 * JWT
 
-
