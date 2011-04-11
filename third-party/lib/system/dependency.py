@@ -21,16 +21,23 @@ def main(argz=None):
 			if(os.path.exists(downloadpath) != True): 
 				os.makedirs(downloadpath)
 			fname = os.path.basename(m.location)
+			ftype = 'tar'
+			if(fname.find('.git') != -1):
+				ftype = 'git'
                         fname = fname.replace('.tar','')
                         fname = fname.replace('.gz','')
                         fname = fname.replace('.tgz','')
+                        fname = fname.replace('.git','')
 			basepkgname= '%s/%s' % (downloadpath, fname)
-			savelocation = '%s.tar.gz' % (basepkgname)
-			urllib.urlretrieve(m.location, savelocation) 
-     			print('saved url ' + m.location + ' to ' + savelocation) 
-			tar = tarfile.open(savelocation)
-			tar.extractall(downloadpath)
-			tar.close()
+			if(ftype is 'git'):
+				subprocess.call(['git','clone',m.location,basepkgname])
+			else:
+				savelocation = '%s.tar.gz' % (basepkgname)
+				urllib.urlretrieve(m.location, savelocation) 
+     				print('saved url ' + m.location + ' to ' + savelocation) 
+				tar = tarfile.open(savelocation)
+				tar.extractall(downloadpath)
+				tar.close()
 			subprocess.call([argz[1], basepkgname, configdir]) 
 		except IOError, e:
      			print(e) 
