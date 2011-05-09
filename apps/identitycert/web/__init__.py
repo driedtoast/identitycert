@@ -44,14 +44,59 @@ def static_file_cc(dir,filename):
 def index():
     return dict(name='index')
 
-### account instances
-@route('/oauth/:name')
-@view('request')
-def loginrequest(name):
-	return dict(name='oauth requests', oauthrequest=name)
+
+### OAUTH 2 flows
+
+
+@route('/oauth2/testauthorize')
+def testauthorize():
+    ## process flow for oauth
+    return "redirect";
+
+@route('/oauth2/callback')
+@view('oauth2/callback')
+def testcallback():
+    ## callback support
+    return dict(name='oauth 2 callback');
+
 
 ## if 'simple_name' in request.POST:
 ##			simple_name = request.POST['simple_name']
+
+@route('/oauth/useragentflow')
+@view('oauth2/useragentflow')
+def oauth2_useragentflow():
+    return dict(name='oauth 2 useragentflow')
+
+@route('/oauth/webserverflow')
+@view('oauth2/webserverflow')
+def oauth2_webserverflow():
+    return dict(name='oauth 2 webserverflow')
+
+@route('/oauth/deviceflow')
+@view('oauth2/deviceflow')
+def oauth2_deviceflow():
+    return dict(name='oauth 2 deviceflow')
+
+@route('/oauth/usernamepasswordflow')
+@view('oauth2/usernamepasswordflow')
+def oauth2_usernamepasswordflow():
+    return dict(name='oauth 2 usernamepasswordflow')
+
+@route('/oauth/clientcredentialsflow')
+@view('oauth2/clientcredentialsflow')
+def oauth2_clientcredentialsflow():
+    return dict(name='oauth 2 clientcredentialsflow')
+
+@route('/oauth/assertionflow')
+@view('oauth2/assertionflow')
+def oauth2_assertionflow():
+    return dict(name='oauth 2 assertionflow')
+    
+
+
+
+
 
 ########################
 ## Starts up the web 
