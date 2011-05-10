@@ -28,13 +28,13 @@ class oauthclient(object):
     ##
     # example url input:
     #     'http://twitter.com/oauth/request_token'
-    #      defaults to base url + /oauth/request_token
+    #      defaults to base url + /request_token
     #  returns:
     #      oauth_token        = request_token['oauth_token']
     #      oauth_token_secret = request_token['oauth_token_secret']
     def requestToken(self, request_token_url=None):
         if (request_token_url is None) and (self.base_url != None):
-            request_token_url = "%s/oauth/request_token" % self.base_url
+            request_token_url = "%s/request_token" % self.base_url
         client = self.getclient()
         resp, content = client.request(request_token_url, "GET")
         if resp['status'] != '200':
@@ -51,7 +51,7 @@ class oauthclient(object):
         if request_token is None:
             request_token = self.request_token
         if(authorize_url is None) and (self.base_url != None):
-            authorize_url = "%s/oauth/authorize" % self.base_url
+            authorize_url = "%s/authorize" % self.base_url
         url = "%s?oauth_token=%s" % (authorize_url, request_token['oauth_token'])
         if params != None:
             for k,v in params.items():
@@ -74,7 +74,7 @@ class oauthclient(object):
         if oauth_verifier != None:
             token.set_verifier(oauth_verifier)
         if(access_token_url is None) and (self.base_url != None):
-            access_token_url = "%s/oauth/access_token" % self.base_url
+            access_token_url = "%s/access_token" % self.base_url
         client = oauth.Client(self.get_consumer, token)
         resp, content = client.request(access_token_url, "POST")
         access_token = dict(urlparse.parse_qsl(content))
