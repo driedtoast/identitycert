@@ -1,4 +1,4 @@
-import sys, os, subprocess
+import sys, os, subprocess, shutil
 sys.path.append(os.path.abspath('../common'))
 import urllib, tarfile
 from config import Config
@@ -19,7 +19,7 @@ def main(argz=None):
 		s = 'Resolving  %s  %s' % (m.name, m.version)
 		try:
 			if(os.path.exists(downloadpath) is True): 
-				os.removedirs(downloadpath)
+				shutil.rmtree(downloadpath)
 				
 			if(os.path.exists(downloadpath) != True): 
 				os.makedirs(downloadpath)
