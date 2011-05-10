@@ -18,6 +18,9 @@ def main(argz=None):
 	for m in cfg.dependencies:
 		s = 'Resolving  %s  %s' % (m.name, m.version)
 		try:
+			if(os.path.exists(downloadpath) is True): 
+				os.removedirs(downloadpath)
+				
 			if(os.path.exists(downloadpath) != True): 
 				os.makedirs(downloadpath)
 			fname = os.path.basename(m.location)
