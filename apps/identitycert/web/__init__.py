@@ -6,6 +6,7 @@ from bottle import request, response
 import bottle
 import os, sys,  traceback
 import setup
+import lib.oauth2 as oauth2
 
 cfg = None
 
@@ -47,11 +48,34 @@ def index():
 
 ### OAUTH 2 flows
 
+def get_param(name):
+    if name in request.GET:
+        return request.GET[name]
+    if name in request.POST:
+        return request.POST[name]
+    return None
+
 
 @route('/oauth2/testauthorize')
 def testauthorize():
     ## process flow for oauth
-    return "redirect";
+    consumer_key = get_param('client_id')
+    type = get_param('type')
+    state = get_param('state')
+    scope = get_param('scope')
+    immediate = get_param('immediate')
+    redirect_uri = get_param('redirect_uri')
+    secret_type = get_param('secret_type')
+    shared_secret = get_param('shared_secret')
+    base_url =  get_param('base_url')
+    
+    params = []
+    params['redirect_uri'] = redirect_uri
+    
+    oauthclient = oauth2.oauthclient(consumer_key, shared_secret, base_url)
+    oauthclient.requestToken()
+    
+    redirect(oauthclient.authorizeRedirect(params=params))
 
 @route('/oauth2/callback')
 @view('oauth2/callback')
