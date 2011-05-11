@@ -119,6 +119,7 @@ def testrequesttoken():
 def request_token_call(secret=None,grant_type='authorization_code',assertion_type=None):
     ## process flow for oauth
     params = request_value_dict(['client_id','redirect_uri'])
+    print grant_type
     if grant_type is 'authorization_code':
         params['code'] = get_param('code')
         params['client_secret'] = get_param('shared_secret')
@@ -132,6 +133,7 @@ def request_token_call(secret=None,grant_type='authorization_code',assertion_typ
         suffix_override = base_url + '/' + suffix_override
     
     oauthclient = oauth2.oauthclient(params['client_id'], get_param('shared_secret'), base_url)
+    print params
     request_token = oauthclient.requestToken(suffix_override, params)
     return request_token
 
@@ -168,8 +170,9 @@ def oauth2_bearerflow():
 def oauth2_bearerflow_submit():
     values = dict(name='oauth 2 bearer submit flow')
     token_type = get_param('token_type')
+    print token_type
     if token_type != None:
-        if token_type is 'jwt':
+        if token_type == 'jwt':
             tojson = {}
             tojson['iss'] = get_param('client_id')
             tojson['exp'] = time.time() + 3400
