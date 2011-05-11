@@ -80,7 +80,7 @@ def dict_subset(map,namelist):
 
 def store_session(map, save=True):
     session = get_session()
-    for k,v in map:
+    for k,v in map.items():
         session[k] = v
     if(save):
         session.save()
@@ -111,13 +111,12 @@ def testauthorize():
     redirect_url = oauthclient.authorizeRedirect(params=params)
     return dict(link=redirect_url )
 
-@route('/oauth2/testrequesttoken')
-@view('oauth2/testauthorize')
 def testrequesttoken():
     ## process flow for oauth
     params = request_value_dict(['client_id','redirect_uri','code'])
     params['grant_type'] = 'authorization_code'
     params['client_secret'] = get_param('shared_secret')
+    base_url =  get_param('base_url')
     ## format
     suffix_override =  get_param('suffix_override')
     if suffix_override != None:
@@ -132,10 +131,12 @@ def testrequesttoken():
 @view('oauth2/callback')
 def testcallback():
     values = request_value_dict(['client_id','shared_secret','code','state','error'])
-    values['name'] = 'oauth 2 callback'
     request_token = testrequesttoken()
-    values.update(request_token)
-    store_session(request_token)
+    if request_token != None:
+    	values.update(request_token)
+    	store_session(request_token)
+	print request_token
+    values['name'] = 'oauth 2 callback'
     return values
 
 @route('/oauth2/useragentflow')

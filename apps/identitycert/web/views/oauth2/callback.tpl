@@ -1,7 +1,7 @@
 <%include file="../header.html"/>
 
 
-<h1 class="fancy">${name}</h1>
+<h1 class="fancy">Callback Status</h1>
 <div class="span-12">
 
 <fieldset>
@@ -28,8 +28,8 @@
 </fieldset>
 <fieldset>
     <legend>test values<legend>
-% if consumer_key != UNDEFINED:
-  <p><label>Consumer Key used:</label>  ${consumer_key} </p>
+% if client_id != UNDEFINED:
+  <p><label>Consumer Key used:</label>  ${client_id} </p>
 % endif
 
 </fieldset>
