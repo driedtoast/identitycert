@@ -1,4 +1,5 @@
 import urlparse
+import json
 import oauth2 as oauth
 
 
@@ -40,17 +41,28 @@ class oauthclient(object):
             request_token_url = "%s/request_token" % self.base_url
         client = self.get_client()
         extra = None
+	format = None
         if params != None:
             for k,v in params.items():
                 if extra is None:
                     extra = "%s=%s" %(k, v)
                 else:
                     extra = extra + "&%s=%s" %(k, v)
+	    if 'format' in params:
+		format = params['format']
         resp, content = client.request(uri=request_token_url, method="POST",body=extra)
         if resp['status'] != '200':
             print content
             raise Exception("Invalid response %s to %s" % (resp['status'],request_token_url))
-        self.request_token = dict(urlparse.parse_qsl(content))
+	print content
+	if format is 'json':
+		self.request_token = {}
+        	jsonobj = json.JSONDecoder().decode(content)
+		for k,v in jsonobj.items():
+			self.request_token[str(k)] = v
+			
+	else:
+        	self.request_token = dict(urlparse.parse_qsl(content))
         return self.request_token
 
     ##

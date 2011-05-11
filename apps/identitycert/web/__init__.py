@@ -103,27 +103,27 @@ def testauthorize():
     consumer_key = get_param('client_id')
     shared_secret = get_param('shared_secret')
     base_url =  get_param('base_url')
-    suffix_override =  get_param('suffix_override')
-    if suffix_override != None:
-        suffix_override = base_url + '/' + suffix_override
     
     oauthclient = oauth2.oauthclient(consumer_key, shared_secret, base_url)
     redirect_url = oauthclient.authorizeRedirect(params=params)
     return dict(link=redirect_url )
 
+## gets the request token from the service
+## based on the suffix 
 def testrequesttoken():
     ## process flow for oauth
     params = request_value_dict(['client_id','redirect_uri','code'])
     params['grant_type'] = 'authorization_code'
     params['client_secret'] = get_param('shared_secret')
+    params['format'] = 'json'
     base_url =  get_param('base_url')
-    ## format
     suffix_override =  get_param('suffix_override')
     if suffix_override != None:
         suffix_override = base_url + '/' + suffix_override
     
     oauthclient = oauth2.oauthclient(params['client_id'], params['client_secret'], base_url)
     request_token = oauthclient.requestToken(suffix_override, params)
+    print request_token
     # token=request_token['oauth_token'],secret=request_token['oauth_token_secret'] )
     return request_token
 
