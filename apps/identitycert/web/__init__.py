@@ -69,7 +69,7 @@ def testauthorize():
     shared_secret = get_param('shared_secret')
     base_url =  get_param('base_url')
     
-    params = []
+    params = {}
     params['redirect_uri'] = redirect_uri
     
     oauthclient = oauth2.oauthclient(consumer_key, shared_secret, base_url)
