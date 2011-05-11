@@ -4,10 +4,13 @@ from bottle import send_file, redirect
 from bottle import PasteServer
 from bottle import request, response
 from beaker.middleware import SessionMiddleware
+import jwt
 import bottle
+import time
 import os, sys,  traceback
 import setup
 import lib.oauth2 as oauth2
+import json
 
 cfg = None
 
@@ -89,10 +92,10 @@ def store_session(map, save=True):
 @view('oauth2/testauthorize')
 def testauthorize():
     ## process flow for oauth
-    tostore = request_value_dict(['client_id','shared_secret','redirect_uri','base_url','state','suffix_override'])
+    tostore = request_value_dict(['client_id','shared_secret','redirect_uri','base_url','state','suffix_override','token_type'])
     params = dict_subset(tostore,['client_id','redirect_uri','state'])
     params['response_type'] = 'code'
-    
+     
     store_session(tostore, False)
     s = get_session()
     if s['state'] is None:
@@ -111,21 +114,27 @@ def testauthorize():
 ## gets the request token from the service
 ## based on the suffix 
 def testrequesttoken():
+    return request_token_call()
+
+def request_token_call(secret=None,grant_type='authorization_code',assertion_type=None):
     ## process flow for oauth
-    params = request_value_dict(['client_id','redirect_uri','code'])
-    params['grant_type'] = 'authorization_code'
-    params['client_secret'] = get_param('shared_secret')
+    params = request_value_dict(['client_id','redirect_uri'])
+    if grant_type is 'authorization_code':
+        params['code'] = get_param('code')
+        params['client_secret'] = get_param('shared_secret')
+    else:
+        params[assertion_type] = secret
+    params['grant_type'] = grant_type
     params['format'] = 'json'
     base_url =  get_param('base_url')
     suffix_override =  get_param('suffix_override')
     if suffix_override != None:
         suffix_override = base_url + '/' + suffix_override
     
-    oauthclient = oauth2.oauthclient(params['client_id'], params['client_secret'], base_url)
+    oauthclient = oauth2.oauthclient(params['client_id'], get_param('shared_secret'), base_url)
     request_token = oauthclient.requestToken(suffix_override, params)
-    print request_token
-    # token=request_token['oauth_token'],secret=request_token['oauth_token_secret'] )
     return request_token
+
 
 @route('/oauth2/callback')
 @view('oauth2/callback')
@@ -148,6 +157,31 @@ def oauth2_useragentflow():
 @view('oauth2/webserverflow')
 def oauth2_webserverflow():
     return dict(name='oauth 2 webserverflow')
+
+@route('/oauth2/bearerflow')
+@view('oauth2/bearerflow')
+def oauth2_bearerflow():
+    return dict(name='oauth 2 bearer flow')
+
+@route('/oauth2/bearerflow/submit')
+@view('oauth2/testauthorize')
+def oauth2_bearerflow_submit():
+    values = dict(name='oauth 2 bearer submit flow')
+    token_type = get_param('token_type')
+    if token_type != None:
+        if token_type is 'jwt':
+            tojson = {}
+            tojson['iss'] = get_param('client_id')
+            tojson['exp'] = time.time() + 3400
+            secret = json.dumps(tojson)
+            secret = jwt.encode(secret, get_param('shared_secret'))
+            token_type='JWT'
+            grant_type = 'http://oauth.net/grant_type/jwt/1.0/bearer'
+            request_token = request_token_call(secret,grant_type,assertion_type=token_type)
+            values.update(request_token)
+    return values
+
+
 
 @route('/oauth2/deviceflow')
 @view('oauth2/deviceflow')

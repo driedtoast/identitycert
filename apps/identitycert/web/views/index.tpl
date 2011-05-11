@@ -1,8 +1,11 @@
 <%include file="header.html"/>
 
-<div class="span-16">
 <h1 class="fancy">OAuth 2 Flows</h1>
+
+<div class="span-16">
+<p>
 OAuth 2 Flows are derived from: <a href="http://hueniverse.com/2010/05/introducing-oauth-2-0/">hueuniverse oauth intro</a>.
+</p>
 <ul>
 <li><a href="/oauth2/useragentflow">User-Agent Flow</a> - for clients running inside a user-agent (typically a web browser).</li>
 <li><a href="/oauth2/webserverflow">Web Server Flow</a> - for clients that are part of a web server application, accessible via HTTP requests. This is a simpler version of the flow provided by OAuth 1.0.</li>
@@ -11,11 +14,13 @@ OAuth 2 Flows are derived from: <a href="http://hueniverse.com/2010/05/introduci
 <li><a href="/oauth2/clientcredentialsflow">Client Credentials Flow</a> - the client uses its credentials to obtain an access token. This flow supports what is known as the 2-legged scenario.</li>
 <li><a href="/oauth2/assertionflow">Assertion Flow</a> - the client presents an assertion such as a SAML assertion to the authorization server in exchange for an access token.</li>
 </ul>
+<p>
+OAuth 2 Bearer Flows
+</p>
+<ul>
+<li><a href="/oauth2/bearerflow">Bearer Flow</a> </li>
+</ul>
 
-</div>
-<div class="span-7 last">
-    <p>&nbsp;</p>
-   <p class="fancy large"> </p>
 </div>
 
 
