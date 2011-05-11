@@ -4,6 +4,20 @@
 <h1 class="fancy">${name}</h1>
 
 
+<p>return values<p>
+% if code != UNDEFINED:
+  Code returned is: ${code} <br />
+% endif
+
+% if consumer_key != UNDEFINED:
+  Consumer Key used:  ${consumer_key} <br />
+% endif
+
+% if state != UNDEFINED:
+  State :  ${state} <br />
+% endif
+
+
 <p> user agent grants expects</p>
 
  access_token

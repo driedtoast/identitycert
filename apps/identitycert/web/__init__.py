@@ -3,6 +3,7 @@ from bottle import mako_view as view
 from bottle import send_file, redirect
 from bottle import PasteServer
 from bottle import request, response
+from beaker.middleware import SessionMiddleware
 import bottle
 import os, sys,  traceback
 import setup
@@ -53,8 +54,14 @@ def get_param(name):
         return request.GET[name]
     if name in request.POST:
         return request.POST[name]
+    sess = get_session()
+    if name in sess:
+	return sess[name]
     return None
 
+def get_session():
+    s = request.environ.get('beaker.session')
+    return s
 
 @route('/oauth2/testauthorize')
 @view('oauth2/testauthorize')
@@ -69,7 +76,17 @@ def testauthorize():
     secret_type = get_param('secret_type')
     shared_secret = get_param('shared_secret')
     base_url =  get_param('base_url')
-    
+
+    s = get_session()
+    if state is None:
+	state = s.id
+   
+    s['consumer_key'] = consumer_key
+    s['shared_secret'] = shared_secret
+    s['base_url'] = base_url
+    s['state'] = state
+    s.save()
+
     suffix_override =  get_param('suffix_override')
     if suffix_override != None:
         suffix_override = base_url + '/' + suffix_override
@@ -119,7 +136,14 @@ def testrequesttoken():
 @view('oauth2/callback')
 def testcallback():
     ## callback support
-    return dict(name='oauth 2 callback');
+    # s['base_url'] = base_url
+    
+    return dict(name='oauth 2 callback', 
+		consumer_key = get_param('consumer_key'),
+		shared_secret = get_param('shared_secret'),
+	        code = get_param('code'), 	
+	        state = get_param('state') 	
+		);
 
 
 ## if 'simple_name' in request.POST:
@@ -166,5 +190,13 @@ def oauth2_assertionflow():
 #######################
 def startweb(host,port):
 	bottle.TEMPLATE_PATH.insert(0,os.path.dirname( os.path.realpath( __file__ ))+'/views/')
-	run(server=PasteServer,host=host, port=port)
+	app = bottle.default_app()
+	session_opts = {
+    		'session.type': 'file',
+    		'session.cookie_expires': 300,
+    		'session.data_dir': './data',
+    		'session.auto': True
+	}
+	app = SessionMiddleware(app,session_opts)
+	run(server=PasteServer,host=host, port=port,app=app)
 
