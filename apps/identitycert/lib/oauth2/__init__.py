@@ -35,11 +35,19 @@ class oauthclient(object):
     #  returns:
     #      oauth_token        = request_token['oauth_token']
     #      oauth_token_secret = request_token['oauth_token_secret']
-    def requestToken(self, request_token_url=None):
+    # TODO: add params for body
+    def requestToken(self, request_token_url=None, params=None):
         if (request_token_url is None) and (self.base_url != None):
             request_token_url = "%s/request_token" % self.base_url
         client = self.get_client()
-        resp, content = client.request(uri=request_token_url, method="POST",body="grant_type=authorization_code")
+        extra = None
+        if params != None:
+            for k,v in params.items():
+                if extra is None:
+                    extra = "%s=%s" %(k, v)
+                else:
+                    extra = extra + "&%s=%s" %(k, v)
+        resp, content = client.request(uri=request_token_url, method="POST",body=extra)
         if resp['status'] != '200':
             print content
             raise Exception("Invalid response %s to %s" % (resp['status'],request_token_url))
