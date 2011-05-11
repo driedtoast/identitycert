@@ -74,9 +74,39 @@ def testauthorize():
     if suffix_override != None:
         suffix_override = base_url + '/' + suffix_override
     params = {}
+    params['client_id'] = consumer_key
+    params['response_type'] = 'code'
+    params['redirect_uri'] = redirect_uri
+    params['state'] = state
+    
+    oauthclient = oauth2.oauthclient(consumer_key, shared_secret, base_url)
+    
+    redirect_url = oauthclient.authorizeRedirect(params=params)
+    return dict(link=redirect_url )
+
+@route('/oauth2/testrequesttoken')
+@view('oauth2/testauthorize')
+def testrequesttoken():
+    ## process flow for oauth
+    consumer_key = get_param('client_id')
+    type = get_param('type')
+    state = get_param('state')
+    scope = get_param('scope')
+    immediate = get_param('immediate')
+    redirect_uri = get_param('redirect_uri')
+    secret_type = get_param('secret_type')
+    shared_secret = get_param('shared_secret')
+    base_url =  get_param('base_url')
+
+    suffix_override =  get_param('suffix_override')
+    if suffix_override != None:
+        suffix_override = base_url + '/' + suffix_override
+    params = {}
     params['grant_type'] = 'authorization_code'
     params['client_id'] = consumer_key
-    
+    params['client_secret'] = shared_secret
+    params['redirect_uri'] = redirect_uri
+
     oauthclient = oauth2.oauthclient(consumer_key, shared_secret, base_url)
     request_token = oauthclient.requestToken(suffix_override, params)
     

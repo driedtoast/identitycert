@@ -35,7 +35,6 @@ class oauthclient(object):
     #  returns:
     #      oauth_token        = request_token['oauth_token']
     #      oauth_token_secret = request_token['oauth_token_secret']
-    # TODO: add params for body
     def requestToken(self, request_token_url=None, params=None):
         if (request_token_url is None) and (self.base_url != None):
             request_token_url = "%s/request_token" % self.base_url
@@ -60,14 +59,23 @@ class oauthclient(object):
     # defaults 
     ##
     def authorizeRedirect(self, authorize_url=None, request_token=None, params=None):
-        if request_token is None:
+        if request_token is None and hasattr(self,'request_token'):
             request_token = self.request_token
         if(authorize_url is None) and (self.base_url != None):
             authorize_url = "%s/authorize" % self.base_url
-        url = "%s?oauth_token=%s" % (authorize_url, request_token['oauth_token'])
+	start = True
+	if request_token != None:
+		start = False
+        	url = "%s?oauth_token=%s" % (authorize_url, request_token['oauth_token'])
+	else:
+		url = authorize_url
         if params != None:
             for k,v in params.items():
-                extra = "&%s=%s" %(k, v)
+		if start:
+                	extra = "?%s=%s" %(k, v)
+			start = False
+		else:
+                	extra = "&%s=%s" %(k, v)
                 url = url + extra    
         return url;
 

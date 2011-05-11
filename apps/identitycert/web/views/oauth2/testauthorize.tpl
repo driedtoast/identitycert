@@ -4,8 +4,12 @@
 <h1 class="fancy">URL in the redirect</h1>
 
 <p>
+% if token != UNDEFINED:
 Request Token: ${token} <br />
+% endif
+% if secret != UNDEFINED:
 Request Token Secret: ${secret} 
+% endif
 </p>
 <p>
 Click on the link below to redirect to the next step of the oauth process.
