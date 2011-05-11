@@ -39,9 +39,10 @@ class oauthclient(object):
         if (request_token_url is None) and (self.base_url != None):
             request_token_url = "%s/request_token" % self.base_url
         client = self.get_client()
-        resp, content = client.request(request_token_url, "GET")
+        resp, content = client.request(uri=request_token_url, method="POST",body="grant_type=authorization_code")
         if resp['status'] != '200':
-            raise Exception("Invalid response %s." % resp['status'])
+            print content
+            raise Exception("Invalid response %s to %s" % (resp['status'],request_token_url))
         self.request_token = dict(urlparse.parse_qsl(content))
         return self.request_token
 
