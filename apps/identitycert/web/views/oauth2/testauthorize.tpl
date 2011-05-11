@@ -2,14 +2,14 @@
 
 
 <h1 class="fancy">URL in the redirect</h1>
-<div class="span-12">
+<div class="span-24 last">
 
 <fieldset>
 % if token != UNDEFINED:
-<p>Request Token: ${token} </p>
+<p><label>Request Token:</label> ${token} </p>
 % endif
 % if secret != UNDEFINED:
-<p>Request Token Secret: ${secret} </p>
+<p><label>Request Token Secret:</label> ${secret} </p>
 % endif
 </fieldset>
 

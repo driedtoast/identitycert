@@ -7,11 +7,11 @@
 <fieldset>
     <legend>return values<legend>
 % if code != UNDEFINED:
- <p> Code returned is: ${code} </p>
+ <p> <label>Code returned is:</label> ${code} </p>
 % endif
 
 % if consumer_key != UNDEFINED:
-  <p>Consumer Key used:  ${consumer_key} </p>
+  <p><label>Consumer Key used:</label>  ${consumer_key} </p>
 % endif
 
 % if state != UNDEFINED:
