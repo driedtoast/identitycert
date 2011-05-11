@@ -8,6 +8,9 @@ import oauth2 as oauth
 ##
 class oauthclient(object):
 
+    client = None
+    consumer = None
+
     def __init__(self, consumer_key, consumer_secret, base_url=None):
         self.consumer_key = consumer_key
         self.consumer_secret = consumer_secret
@@ -21,7 +24,7 @@ class oauthclient(object):
     def get_client(self):
         if self.client != None:
             return self.client
-        consumer = self.get_consumer
+        consumer = self.get_consumer()
         self.client = oauth.Client(consumer)
         return self.client
 
@@ -35,7 +38,7 @@ class oauthclient(object):
     def requestToken(self, request_token_url=None):
         if (request_token_url is None) and (self.base_url != None):
             request_token_url = "%s/request_token" % self.base_url
-        client = self.getclient()
+        client = self.get_client()
         resp, content = client.request(request_token_url, "GET")
         if resp['status'] != '200':
             raise Exception("Invalid response %s." % resp['status'])
@@ -75,7 +78,7 @@ class oauthclient(object):
             token.set_verifier(oauth_verifier)
         if(access_token_url is None) and (self.base_url != None):
             access_token_url = "%s/access_token" % self.base_url
-        client = oauth.Client(self.get_consumer, token)
+        client = oauth.Client(self.get_consumer(), token)
         resp, content = client.request(access_token_url, "POST")
         access_token = dict(urlparse.parse_qsl(content))
         return access_token

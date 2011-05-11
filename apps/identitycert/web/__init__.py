@@ -70,8 +70,7 @@ def testauthorize():
     shared_secret = get_param('shared_secret')
     base_url =  get_param('base_url')
     
-    
-    params = []
+    params = {}
     params['redirect_uri'] = redirect_uri
     
     oauthclient = oauth2.oauthclient(consumer_key, shared_secret, base_url)
@@ -89,32 +88,32 @@ def testcallback():
 ## if 'simple_name' in request.POST:
 ##			simple_name = request.POST['simple_name']
 
-@route('/oauth/useragentflow')
+@route('/oauth2/useragentflow')
 @view('oauth2/useragentflow')
 def oauth2_useragentflow():
     return dict(name='oauth 2 useragentflow')
 
-@route('/oauth/webserverflow')
+@route('/oauth2/webserverflow')
 @view('oauth2/webserverflow')
 def oauth2_webserverflow():
     return dict(name='oauth 2 webserverflow')
 
-@route('/oauth/deviceflow')
+@route('/oauth2/deviceflow')
 @view('oauth2/deviceflow')
 def oauth2_deviceflow():
     return dict(name='oauth 2 deviceflow')
 
-@route('/oauth/usernamepasswordflow')
+@route('/oauth2/usernamepasswordflow')
 @view('oauth2/usernamepasswordflow')
 def oauth2_usernamepasswordflow():
     return dict(name='oauth 2 usernamepasswordflow')
 
-@route('/oauth/clientcredentialsflow')
+@route('/oauth2/clientcredentialsflow')
 @view('oauth2/clientcredentialsflow')
 def oauth2_clientcredentialsflow():
     return dict(name='oauth 2 clientcredentialsflow')
 
-@route('/oauth/assertionflow')
+@route('/oauth2/assertionflow')
 @view('oauth2/assertionflow')
 def oauth2_assertionflow():
     return dict(name='oauth 2 assertionflow')

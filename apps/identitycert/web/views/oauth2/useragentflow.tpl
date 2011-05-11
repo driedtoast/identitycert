@@ -25,6 +25,7 @@ Example request from submission:
 GET /authorize?type=user_agent&client_id=s6BhdRkqt3&
          redirect_uri=https%3A%2F%2FEexample%2Ecom%2Frd HTTP/1.1
 
+<input type="submit" value="send redirect" />
 </form>
 
 </div>
