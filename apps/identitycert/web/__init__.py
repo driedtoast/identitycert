@@ -57,6 +57,7 @@ def get_param(name):
 
 
 @route('/oauth2/testauthorize')
+@view('oauth2/testauthorize')
 def testauthorize():
     ## process flow for oauth
     consumer_key = get_param('client_id')
@@ -69,13 +70,14 @@ def testauthorize():
     shared_secret = get_param('shared_secret')
     base_url =  get_param('base_url')
     
+    
     params = []
     params['redirect_uri'] = redirect_uri
     
     oauthclient = oauth2.oauthclient(consumer_key, shared_secret, base_url)
-    oauthclient.requestToken()
-    
-    redirect(oauthclient.authorizeRedirect(params=params))
+    request_token = oauthclient.requestToken()
+    redirect_url = oauthclient.authorizeRedirect(params=params)
+    return dict(link=redirect_url, token=request_token['oauth_token'],secret=request_token['oauth_token_secret'] )
 
 @route('/oauth2/callback')
 @view('oauth2/callback')
