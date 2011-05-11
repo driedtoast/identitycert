@@ -164,7 +164,7 @@ def oauth2_bearerflow():
     return dict(name='oauth 2 bearer flow')
 
 @route('/oauth2/bearerflow/submit')
-@view('oauth2/testauthorize')
+@view('oauth2/callback')
 def oauth2_bearerflow_submit():
     values = dict(name='oauth 2 bearer submit flow')
     token_type = get_param('token_type')
