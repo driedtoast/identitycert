@@ -1,28 +1,26 @@
 <%include file="../header.html"/>
 
-<div class="span-16">
-<h1 class="fancy">URL in the redirect</h1>
 
-<p>
+<h1 class="fancy">URL in the redirect</h1>
+<div class="span-12">
+
+<fieldset>
 % if token != UNDEFINED:
-Request Token: ${token} <br />
+<p>Request Token: ${token} </p>
 % endif
 % if secret != UNDEFINED:
-Request Token Secret: ${secret} 
+<p>Request Token Secret: ${secret} </p>
 % endif
-</p>
-<p>
+</fieldset>
+
+<div class="info">
 Click on the link below to redirect to the next step of the oauth process.
 This normally will happen without a click, but this gives you a chance to review the link values.
+</div>
+<p>
+<a href="${link}">${link}</a>
 </p>
 
-<a href="${link}">${link}</a>
-
 </div>
-<div class="span-7 last">
-    <p>&nbsp;</p>
-   <p class="fancy large"> </p>
-</div>
-
 
 <%include file="../footer.html"/>

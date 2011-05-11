@@ -4,13 +4,13 @@
 
 <div class="span-12">
 
- <p>
-    Flow supported as specified in the <a href="http://tools.ietf.org/html/draft-ietf-oauth-v2-02#section-3.5.2"> Web Server Flow Spec</a>.
-    </p>
+<p>
+Flow supported as specified in the <a href="http://tools.ietf.org/html/draft-ietf-oauth-v2-02#section-3.5.2"> Web Server Flow Spec</a>.
+</p>
 
+<form action="/oauth2/testauthorize">
 <fieldset> 
     <legend>For normal protocol request</legend> 
-    <form action="/oauth2/testauthorize">
     <p>
     <label>Client id</label><br /><input type="text" name="client_id" size="90" />
     </p>
@@ -27,7 +27,7 @@
     <label>Immediate (true or false)</label><br /><input type="text" name="immediate" value="false" size="20" />
     </p>
     <p>
-    <label>Redirect URI</label><br /><input type="text" name="redirect_uri" value="http://127.0.0.1:9080/oauth2/callback" />
+    <label>Redirect URI</label><br /><input type="text" name="redirect_uri" size="90" value="http://127.0.0.1:9080/oauth2/callback" />
     </p>
 </fieldset>
 <fieldset>
@@ -36,7 +36,7 @@
     <label>Shared Secret</label><br /><input type="text" name="shared_secret" size="90" />
     </p>
     <p>
-    <label>Base URL</label><br /><input type="text" name="base_url" size="40"/></p>
+    <label>Base URL</label><br /><input type="text" name="base_url" size="90"/></p>
     <p>
     <label>Suffix Override</label><br /><input type="text" name="suffix_override" size="40"/></p>
 </fieldset>
@@ -45,14 +45,14 @@
 <input type="submit" value="send redirect" />
 </p>
 </form>
-
-
-<div class="notice">
-Example request from submission:
-GET /authorize?type=web_server&client_id=s6BhdRkqt3&redirect_uri=
-         https%3A%2F%2Fclient%2Eexample%2Ecom%2Fcb HTTP/1.1
 </div>
 
+<div class="span-24 last">
+    <div class="notice">
+    Example request from submission:
+    GET /authorize?type=web_server&client_id=s6BhdRkqt3&redirect_uri=
+             https%3A%2F%2Fclient%2Eexample%2Ecom%2Fcb HTTP/1.1
+    </div>
 </div>
 
 <%include file="../footer.html"/>
