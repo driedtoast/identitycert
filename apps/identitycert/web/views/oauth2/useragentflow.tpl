@@ -20,6 +20,7 @@ Flow supported as specified in the <a href="http://tools.ietf.org/html/draft-iet
 <div class="note">Required for test processing</div>
 <label>Shared Secret</label> <input type="text" name="shared_secret" size="90" /> <br />
 <label>Base URL</label> <input type="text" name="base_url" size="40"/><br />
+<label>Suffix Override</label> <input type="text" name="suffix_override" size="40"/><br />
 
 Example request from submission:
 GET /authorize?type=user_agent&client_id=s6BhdRkqt3&

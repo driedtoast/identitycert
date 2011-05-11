@@ -69,12 +69,14 @@ def testauthorize():
     secret_type = get_param('secret_type')
     shared_secret = get_param('shared_secret')
     base_url =  get_param('base_url')
-    
+    suffix_override =  get_param('suffix_override')
+    if suffix_override != None:
+        suffix_override = base_url + '/' + suffix_override
     params = {}
     params['redirect_uri'] = redirect_uri
     
     oauthclient = oauth2.oauthclient(consumer_key, shared_secret, base_url)
-    request_token = oauthclient.requestToken()
+    request_token = oauthclient.requestToken(suffix_override)
     redirect_url = oauthclient.authorizeRedirect(params=params)
     return dict(link=redirect_url, token=request_token['oauth_token'],secret=request_token['oauth_token_secret'] )
 
