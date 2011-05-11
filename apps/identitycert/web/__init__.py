@@ -63,41 +63,51 @@ def get_session():
     s = request.environ.get('beaker.session')
     return s
 
+## get a list of return values
+def request_value_dict(namelist):
+    retdict = {}
+    for name in namelist:
+        retdict[name] = get_param(name)
+    return retdict    
+    
+## get a subset of a dict based on name list
+def dict_subset(map,namelist):
+    retdict = {}
+    for name in namelist: 
+        if name in map:
+            retdict[name] = map[name]
+    return retdict
+
+def store_session(map, save=True):
+    session = get_session()
+    for k,v in map:
+        session[k] = v
+    if(save):
+        session.save()
+
 @route('/oauth2/testauthorize')
 @view('oauth2/testauthorize')
 def testauthorize():
     ## process flow for oauth
+    tostore = request_value_dict(['client_id','shared_secret','redirect_uri','base_url','state','suffix_override'])
+    params = dict_subset(tostore,['client_id','redirect_uri','state'])
+    params['response_type'] = 'code'
+    
+    store_session(tostore, False)
+    s = get_session()
+    if s['state'] is None:
+	s['state'] = s.id
+        params['state'] = s['state']
+    s.save()
+    
     consumer_key = get_param('client_id')
-    type = get_param('type')
-    state = get_param('state')
-    scope = get_param('scope')
-    immediate = get_param('immediate')
-    redirect_uri = get_param('redirect_uri')
-    secret_type = get_param('secret_type')
     shared_secret = get_param('shared_secret')
     base_url =  get_param('base_url')
-
-    s = get_session()
-    if state is None:
-	state = s.id
-   
-    s['consumer_key'] = consumer_key
-    s['shared_secret'] = shared_secret
-    s['base_url'] = base_url
-    s['state'] = state
-    s.save()
-
     suffix_override =  get_param('suffix_override')
     if suffix_override != None:
         suffix_override = base_url + '/' + suffix_override
-    params = {}
-    params['client_id'] = consumer_key
-    params['response_type'] = 'code'
-    params['redirect_uri'] = redirect_uri
-    params['state'] = state
     
     oauthclient = oauth2.oauthclient(consumer_key, shared_secret, base_url)
-    
     redirect_url = oauthclient.authorizeRedirect(params=params)
     return dict(link=redirect_url )
 
@@ -105,49 +115,28 @@ def testauthorize():
 @view('oauth2/testauthorize')
 def testrequesttoken():
     ## process flow for oauth
-    consumer_key = get_param('client_id')
-    type = get_param('type')
-    state = get_param('state')
-    scope = get_param('scope')
-    immediate = get_param('immediate')
-    redirect_uri = get_param('redirect_uri')
-    secret_type = get_param('secret_type')
-    shared_secret = get_param('shared_secret')
-    base_url =  get_param('base_url')
-
+    params = request_value_dict(['client_id','redirect_uri','code'])
+    params['grant_type'] = 'authorization_code'
+    params['client_secret'] = get_param('shared_secret')
+    ## format
     suffix_override =  get_param('suffix_override')
     if suffix_override != None:
         suffix_override = base_url + '/' + suffix_override
-    params = {}
-    params['grant_type'] = 'authorization_code'
-    params['client_id'] = consumer_key
-    params['client_secret'] = shared_secret
-    params['redirect_uri'] = redirect_uri
-
-    oauthclient = oauth2.oauthclient(consumer_key, shared_secret, base_url)
-    request_token = oauthclient.requestToken(suffix_override, params)
     
-    params = {}
-    params['redirect_uri'] = redirect_uri
-    redirect_url = oauthclient.authorizeRedirect(params=params)
-    return dict(link=redirect_url, token=request_token['oauth_token'],secret=request_token['oauth_token_secret'] )
+    oauthclient = oauth2.oauthclient(params['client_id'], params['client_secret'], base_url)
+    request_token = oauthclient.requestToken(suffix_override, params)
+    # token=request_token['oauth_token'],secret=request_token['oauth_token_secret'] )
+    return request_token
 
 @route('/oauth2/callback')
 @view('oauth2/callback')
 def testcallback():
-    ## callback support
-    # s['base_url'] = base_url
-    
-    return dict(name='oauth 2 callback', 
-		consumer_key = get_param('consumer_key'),
-		shared_secret = get_param('shared_secret'),
-	        code = get_param('code'), 	
-	        state = get_param('state') 	
-		);
-
-
-## if 'simple_name' in request.POST:
-##			simple_name = request.POST['simple_name']
+    values = request_value_dict(['client_id','shared_secret','code','state','error'])
+    values['name'] = 'oauth 2 callback'
+    request_token = testrequesttoken()
+    values.update(request_token)
+    store_session(request_token)
+    return values
 
 @route('/oauth2/useragentflow')
 @view('oauth2/useragentflow')

@@ -10,13 +10,28 @@
  <p> <label>Code returned is:</label> ${code} </p>
 % endif
 
+
+% if state != UNDEFINED:
+ <p><label>State</label> :  ${state} </p>
+% endif
+
+% if access_token != UNDEFINED:
+ <p>Access Token :  ${access_token} </p>
+% endif
+% if refresh_token != UNDEFINED:
+ <p>Refresh Token :  ${refresh_token} </p>
+% endif
+
+% if error != UNDEFINED:
+ <p class="error">Error :  ${error} </p>
+% endif
+</fieldset>
+<fieldset>
+    <legend>test values<legend>
 % if consumer_key != UNDEFINED:
   <p><label>Consumer Key used:</label>  ${consumer_key} </p>
 % endif
 
-% if state != UNDEFINED:
- <p>State :  ${state} </p>
-% endif
 </fieldset>
 
 <p> user agent grants expects</p>
