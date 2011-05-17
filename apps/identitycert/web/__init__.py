@@ -175,9 +175,12 @@ def oauth2_bearerflow_submit():
         if token_type == 'jwt':
             tojson = {}
             tojson['iss'] = get_param('client_id')
-            tojson['exp'] = time.time() + 3400
+            tojson['prn'] = get_param('username')
+	    print time.time()
+	    print  (time.time() + 3400)
+            tojson['exp'] = round(time.time() + 3400,0)
             secret = json.dumps(tojson)
-            secret = jwt.encode(secret, get_param('shared_secret'))
+            secret = jwt.encode(tojson, get_param('shared_secret'))
             token_type='JWT'
             grant_type = 'http://oauth.net/grant_type/jwt/1.0/bearer'
             request_token = request_token_call(secret,grant_type,assertion_type=token_type)

@@ -15,6 +15,10 @@ Bearer supported as specified in the <a href="http://self-issued.info/docs/draft
     <label>Client id</label><br /><input type="text" name="client_id" size="90" />
     </p>
     <p>
+    <label>Username</label><br /><input type="text" name="username" size="90" />
+    </p>
+
+    <p>
     <label>State</label><br /><input type="text" name="state" size="90" />
     </p>
     <p>
