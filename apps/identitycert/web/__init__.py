@@ -123,8 +123,12 @@ def request_token_call(secret=None,grant_type='authorization_code',assertion_typ
     if grant_type is 'authorization_code':
         params['code'] = get_param('code')
         params['client_secret'] = get_param('shared_secret')
+    elif grant_type is 'refresh_token':
+	# todo implement
+	pass
     else:
-        params[assertion_type] = secret
+	## assume its a bearer token flow
+        params['assertion'] = secret
     params['grant_type'] = grant_type
     params['format'] = 'json'
     base_url =  get_param('base_url')
