@@ -20,7 +20,7 @@ for currentf in glob.glob( os.path.join(sitepkgs, '*') ):
 if sys.argv:
         app = sys.argv[1]
 	sys.path.append(os.path.abspath('./apps/'+app))
-	importname = 'application'
+	importname = 'wsgiapplication'
 	# __import__(importname)
 	try:
         	moduleLoaded =  sys.modules[importname]
