@@ -37,6 +37,29 @@
 
 </fieldset>
 
+
+<fieldset>
+    <legend>input values<legend>
+% if url_used != UNDEFINED:
+  <p><label>Request Url:</label>  ${url_used} </p>
+% endif
+% if assertion != UNDEFINED:
+  <p><label>Assertion Value:</label>  ${assertion} </p>
+% endif
+
+
+% if grant_type != UNDEFINED:
+  <p><label>Grant Type:</label>  ${grant_type} </p>
+% endif
+
+% if code != UNDEFINED:
+  <p><label>CODE:</label>  ${code} </p>
+% endif
+
+
+
+</fieldset>
+
 </div>
 
 
