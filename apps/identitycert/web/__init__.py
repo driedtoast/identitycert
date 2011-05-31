@@ -71,7 +71,9 @@ def get_session():
 def request_value_dict(namelist):
     retdict = {}
     for name in namelist:
-        retdict[name] = get_param(name)
+	param = get_param(name)
+	if param != None:
+		retdict[name] = param
     return retdict    
     
 ## get a subset of a dict based on name list
@@ -156,7 +158,9 @@ def request_token_call(secret=None,grant_type='authorization_code',assertion_typ
 	request_token.update(params)
 	request_token['error'] = 'Unknown error'
     if suffix_override != None:	
-	request_token['url_used'] = suffix_override + '?' + sending
+	request_token['url_used'] = suffix_override + '?' + sendingi
+	
+	
     else:
 	request_token['url_used'] = base_url + '/oauth/request_token?' + sending
     return request_token
