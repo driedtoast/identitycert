@@ -40,15 +40,10 @@ class oauthclient(object):
         if (request_token_url is None) and (self.base_url != None):
             request_token_url = "%s/request_token" % self.base_url
         client = self.get_client()
-        extra = None
+        extra = toqueryparams(params)
 	format = None
         if params != None:
-            for k,v in params.items():
-                if extra is None:
-                    extra = "%s=%s" %(k, v)
-                else:
-                    extra = extra + "&%s=%s" %(k, v)
-	    if 'format' in params:
+            if 'format' in params:
 		format = params['format']
         resp, content = client.request(uri=request_token_url, method="POST",body=extra)
         if resp['status'] != '200':
@@ -65,6 +60,15 @@ class oauthclient(object):
         	self.request_token = dict(urlparse.parse_qsl(content))
         return self.request_token
 
+    def toqueryparams(self,params):
+	extra = None
+	if params != None:
+            for k,v in params.items():
+                if extra is None:
+                    extra = "%s=%s" %(k, v)
+                else:
+                    extra = extra + "&%s=%s" %(k, v)
+	return extra
     ##
     # example url input - 'http://twitter.com/oauth/authorize'
     # request token from previous step
