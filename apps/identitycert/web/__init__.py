@@ -136,8 +136,9 @@ def request_token_call(secret=None,grant_type='authorization_code',assertion_typ
     suffix_override =  get_param('suffix_override')
     if suffix_override != None:
         suffix_override = base_url + '/' + suffix_override
+    oauthclient = oauth2.oauthclient(params['client_id'], get_param('shared_secret'), base_url)
+    sending = oauthclient.toqueryparams(params)
     try: 
-	oauthclient = oauth2.oauthclient(params['client_id'], get_param('shared_secret'), base_url)
 	request_token = oauthclient.requestToken(suffix_override, params)
 	request_token.update(params);
 	if (has_key(request_token,'error')):
@@ -154,6 +155,10 @@ def request_token_call(secret=None,grant_type='authorization_code',assertion_typ
 	request_token = {}
 	request_token.update(params)
 	request_token['error'] = 'Unknown error'
+    if suffix_override != None:	
+	request_token['url_used'] = suffix_override + '?' + sending
+    else:
+	request_token['url_used'] = base_url + '/oauth/request_token?' + sending
     return request_token
 
 
