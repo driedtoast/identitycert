@@ -1,9 +1,10 @@
 import sys, os, imp, glob
 
 
+currdir = os.path.dirname(__file__)
 
-commonlib = '../third-party/lib/common/'
-sitepkgs = '../third-party/lib/site-packages'
+commonlib = currdir + '/../third-party/lib/common/'
+sitepkgs = currdir + '/../third-party/lib/site-packages'
 
 
 sys.path.append(os.path.abspath(commonlib))
@@ -20,8 +21,8 @@ for currentf in glob.glob( os.path.join(sitepkgs, '*') ):
 
 
 app = 'identitycert'
-sys.path.append(os.path.abspath('../apps/'+app))
-importname = 'application'
+sys.path.append(os.path.abspath(currdir + '/../apps/'+app))
+importname = 'wsgiapplication'
 # __import__(importname)
 try:
         moduleLoaded =  sys.modules[importname]
@@ -37,7 +38,7 @@ finally:
                 fp.close()
 print('starting up '+app)
 config = None
-cfgfile = '../conf/%s.cfg' % app
+cfgfile = currdir + '/../conf/%s.cfg' % app
 if (os.path.exists(cfgfile)):
         from config import Config
         f = file(cfgfile)
