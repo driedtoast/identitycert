@@ -16,4 +16,4 @@ def start(argv=None,config=None, runmode=True):
 	# print db.check()
 	## TODO put startup logic here
 	web.cfg = config
-	return web.startweb(host=config.server.hostname, port=config.server.port, runmode)
+	return web.startweb(host=config.server.hostname, port=config.server.port, runmode=runmode)

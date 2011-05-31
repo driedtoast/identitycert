@@ -222,7 +222,7 @@ def oauth2_assertionflow():
 ## Starts up the web 
 ## application
 #######################
-def startweb(host,port,start=true):
+def startweb(host,port,runmode=True):
 	bottle.TEMPLATE_PATH.insert(0,os.path.dirname( os.path.realpath( __file__ ))+'/views/')
 	app = bottle.default_app()
 	session_opts = {
@@ -232,7 +232,7 @@ def startweb(host,port,start=true):
     		'session.auto': True
 	}
 	app = SessionMiddleware(app,session_opts)
-	if start:
+	if runmode:
 		run(server=PasteServer,host=host, port=port,app=app)
 	return app
 
