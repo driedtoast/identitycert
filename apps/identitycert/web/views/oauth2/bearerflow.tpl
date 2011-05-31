@@ -12,20 +12,19 @@ Bearer supported as specified in the <a href="http://self-issued.info/docs/draft
 <fieldset> 
     <legend>For normal protocol request</legend> 
     <p>
-    <label>Client id</label><br /><input type="text" name="client_id" size="90" />
+    <label>Username (prn) </label><br /><input type="text" name="username" size="90" />
     </p>
     <p>
-    <label>Username</label><br /><input type="text" name="username" size="90" />
+    <label>Domain (aud)</label><br /><input type="text" name="aud" size="90" value="" />
     </p>
-
+    <p>
+    <label>Client id (iss)</label><br /><input type="text" name="client_id" size="90" />
+    </p>
     <p>
     <label>State</label><br /><input type="text" name="state" size="90" />
     </p>
     <p>
     <label>Scope (space delimited)</label><br /><input type="text" name="scope" size="90" />
-    </p>
-    <p>
-    <label>Redirect URI</label><br /><input type="text" name="redirect_uri" size="90" value="http://127.0.0.1:9080/oauth2/callback" />
     </p>
 </fieldset>
 <fieldset>

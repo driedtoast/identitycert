@@ -11,6 +11,7 @@ import os, sys,  traceback
 import setup
 import lib.oauth2 as oauth2
 import json
+import setup
 
 cfg = None
 
@@ -137,8 +138,11 @@ def request_token_call(secret=None,grant_type='authorization_code',assertion_typ
         suffix_override = base_url + '/' + suffix_override
     
     oauthclient = oauth2.oauthclient(params['client_id'], get_param('shared_secret'), base_url)
-    print params
     request_token = oauthclient.requestToken(suffix_override, params)
+    request_token.update(params);
+    if (has_key(request_token,'error')):
+	request_token['error_description'] = setup.get_message(request_token['error'])
+	
     return request_token
 
 
@@ -180,8 +184,7 @@ def oauth2_bearerflow_submit():
             tojson = {}
             tojson['iss'] = get_param('client_id')
             tojson['prn'] = get_param('username')
-	    print time.time()
-	    print  (time.time() + 3400)
+	    tojson['aud'] = get_param('aud')
             tojson['exp'] = round(time.time() + 3400,0)
             secret = json.dumps(tojson)
             secret = jwt.encode(tojson, get_param('shared_secret'))
