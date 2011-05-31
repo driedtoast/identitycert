@@ -158,7 +158,7 @@ def request_token_call(secret=None,grant_type='authorization_code',assertion_typ
 	request_token.update(params)
 	request_token['error'] = 'Unknown error'
     if suffix_override != None:	
-	request_token['url_used'] = suffix_override + '?' + sendingi
+	request_token['url_used'] = suffix_override + '?' + sending
 	
 	
     else:
