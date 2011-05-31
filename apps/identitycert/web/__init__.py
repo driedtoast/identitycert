@@ -142,14 +142,14 @@ def request_token_call(secret=None,grant_type='authorization_code',assertion_typ
 	request_token.update(params);
 	if (has_key(request_token,'error')):
 	    request_token['error_description'] = setup.get_message(request_token['error'])
-    except Exception as (errno, strerror):
+    except Exception as e:
 	request_token = {}
 	request_token.update(params)
-	request_token['error'] = "Error occured in oAuth Call ({0}): {1}".format(errno, strerror)
-    except ValueError as (errno, strerror):
+	request_token['error'] = "Error occured in oAuth Call ({0})".format(e)
+    except ValueError as ve:
 	request_token = {}
 	request_token.update(params)
-	request_token['error'] = "Input Error occured in oAuth Call ({0}): {1}".format(errno, strerror)
+	request_token['error'] = "Input Error occured in oAuth Call ({0})".format(ve)
     except:
 	request_token = {}
 	request_token.update(params)
