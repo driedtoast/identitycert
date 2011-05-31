@@ -142,7 +142,7 @@ def request_token_call(secret=None,grant_type='authorization_code',assertion_typ
 	request_token.update(params);
 	if (has_key(request_token,'error')):
 	    request_token['error_description'] = setup.get_message(request_token['error'])
-    except Exception as (errno, strerror):
+    except Error as (errno, strerror):
 	request_token = {}
 	request_token.update(params)
 	request_token['error'] = "Error occured in oAuth Call ({0}): {1}".format(errno, strerror)
@@ -195,6 +195,8 @@ def oauth2_bearerflow_submit():
             grant_type = 'http://oauth.net/grant_type/jwt/1.0/bearer'
             request_token = request_token_call(secret,grant_type,assertion_type=token_type)
             values.update(request_token)
+	else:
+	    values = {"error":"No token type provided on form"}
     return values
 
 
