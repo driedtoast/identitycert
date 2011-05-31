@@ -10,8 +10,8 @@ datadir = basedir + '/data'
 jobsdir = None
 
 
-msgConfFile = file( static + '/messages.cfg')
-msgConf = Config(f)
+msgConfFile = file( staticdir + '/messages.cfg')
+msgConf = Config(msgConfFile)
 
 
 ## configurations
