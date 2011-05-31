@@ -40,7 +40,7 @@ class oauthclient(object):
         if (request_token_url is None) and (self.base_url != None):
             request_token_url = "%s/request_token" % self.base_url
         client = self.get_client()
-        extra = toqueryparams(params)
+        extra = self.toqueryparams(params)
 	format = None
         if params != None:
             if 'format' in params:
