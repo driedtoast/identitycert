@@ -149,6 +149,7 @@ def request_token_call(secret=None,grant_type='authorization_code',assertion_typ
 	request_token = {}
 	request_token.update(params)
 	request_token['error'] = "Error occured in oAuth Call ({0})".format(e)
+        print (e)
     except ValueError as ve:
 	request_token = {}
 	request_token.update(params)
