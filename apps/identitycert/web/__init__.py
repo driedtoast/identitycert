@@ -143,7 +143,7 @@ def request_token_call(secret=None,grant_type='authorization_code',assertion_typ
     try: 
 	request_token = oauthclient.requestToken(suffix_override, params)
 	request_token.update(params);
-	if (has_key(request_token,'error')):
+	if ('error' in request_token):
 	    request_token['error_description'] = setup.get_message(request_token['error'])
     except Exception as e:
 	request_token = {}
