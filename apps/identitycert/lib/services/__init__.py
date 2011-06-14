@@ -1,7 +1,6 @@
 
 from bottle import request, response
 
-session = SessionService()
 
 ## simple wrapper for session stuff
 class SessionService(object):
@@ -28,6 +27,8 @@ class SessionService(object):
         sess = self.get_session()
         sess[name] = value
         sess.save()
+
+session = SessionService()
 
 ## Gets param from session or session    
 def get_param(name):

@@ -140,10 +140,10 @@ class OAuthService(object):
 	suffix_override =  services.get_param('suffix_override')
 	if suffix_override != None:
 	    suffix_override = base_url + '/' + suffix_override
-	oauthclient = oauthclient(params['client_id'], services.get_param('shared_secret'), base_url)
-	sending = oauthclient.toqueryparams(params)
+	client = oauthclient(params['client_id'], services.get_param('shared_secret'), base_url)
+	sending = client.toqueryparams(params)
 	try: 
-	    request_token = oauthclient.requestToken(suffix_override, params)
+	    request_token = client.requestToken(suffix_override, params)
 	    request_token.update(params);
 	    if ('error' in request_token):
 		request_token['error_description'] = setup.get_message(request_token['error'])
