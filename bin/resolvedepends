@@ -18,6 +18,16 @@ CONFIG_DIR=$BASE_DIR/$CONFIG_DIR
 echo "Loading config from $CONFIG_DIR"
 echo "Starting with base directory $BASE_DIR"
 
+sudo $PKG_MGR install python-setuptools
+PRG_CHK=`which swig`
+if [ ! $PRG_CHK ]; then
+    sudo $PKG_MGR install swig
+fi
+if [ $PKG_MGR = "apt-get" ]; then 
+    sudo $PKG_MGR install python-m2crypto
+fi
+
+
 OLD_PATH=$PYTHONPATH
 NEWPYTHONPATH=`pwd`
 if [ -d "$BASE_DIR/$THIRD_PARTY/lib/common" ]; then
