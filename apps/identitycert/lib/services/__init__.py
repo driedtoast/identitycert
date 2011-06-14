@@ -29,6 +29,11 @@ class SessionService(object):
         sess[name] = value
         sess.save()
 
+def get_file(name):
+    if name in request.files:
+	filereq = request.files.get(name);
+	return filereq.file.read()
+    return None
 ## Gets param from session or session    
 def get_param(name):
     if name in request.GET:
