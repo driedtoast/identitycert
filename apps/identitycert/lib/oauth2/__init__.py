@@ -1,7 +1,8 @@
 import urlparse
 import json
 import oauth2 as oauth
-
+import setup
+import lib.services as services
 
 ##
 # Simplifies the use of the oauth client just a bit
@@ -116,3 +117,55 @@ class oauthclient(object):
         access_token = dict(urlparse.parse_qsl(content))
         return access_token
 
+
+### wraps some of the auth calls for the web UI
+class OAuthService(object):
+    
+    def __init__(self):
+	pass
+    
+    def request_token_call(self,secret=None,grant_type='authorization_code',assertion_type=None):
+	## process flow for oauth
+	params = services.request_value_dict(['client_id','redirect_uri'])
+	if grant_type is 'authorization_code':
+	    params['code'] = services.get_param('code')
+	    params['client_secret'] = services.get_param('shared_secret')
+	elif grant_type is 'refresh_token':
+	    # todo implement
+	    pass
+	else:
+	    ## assume its a bearer token flow
+	    params['assertion'] = secret
+	params['grant_type'] = grant_type
+	params['format'] = 'json'
+	base_url =  services.get_param('base_url')
+	suffix_override =  services.get_param('suffix_override')
+	if suffix_override != None:
+	    suffix_override = base_url + '/' + suffix_override
+	oauthclient = oauthclient(params['client_id'], services.get_param('shared_secret'), base_url)
+	sending = oauthclient.toqueryparams(params)
+	try: 
+	    request_token = oauthclient.requestToken(suffix_override, params)
+	    request_token.update(params);
+	    if ('error' in request_token):
+		request_token['error_description'] = setup.get_message(request_token['error'])
+	except Exception as e:
+	    request_token = {}
+	    request_token.update(params)
+	    request_token['error'] = "Error occured in oAuth Call ({0})".format(e)
+	    print (e)
+	except ValueError as ve:
+	    request_token = {}
+	    request_token.update(params)
+	    request_token['error'] = "Input Error occured in oAuth Call ({0})".format(ve)
+	except:
+	    request_token = {}
+	    request_token.update(params)
+	    request_token['error'] = 'Unknown error'
+	if suffix_override != None:	
+	    request_token['url_used'] = suffix_override + '?' + sending
+	else:
+	    request_token['url_used'] = base_url + '/oauth/request_token?' + sending
+	return request_token
+
+service = OAuthService()

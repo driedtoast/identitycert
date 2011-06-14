@@ -12,6 +12,7 @@ import setup
 import lib.oauth2 as oauth2
 import json
 import setup
+import lib.services as services
 
 cfg = None
 
@@ -53,126 +54,35 @@ def index():
 
 ### OAUTH 2 flows
 
-def get_param(name):
-    if name in request.GET:
-        return request.GET[name]
-    if name in request.POST:
-        return request.POST[name]
-    sess = get_session()
-    if name in sess:
-	return sess[name]
-    return None
-
-def get_session():
-    s = request.environ.get('beaker.session')
-    return s
-
-## get a list of return values
-def request_value_dict(namelist):
-    retdict = {}
-    for name in namelist:
-	param = get_param(name)
-	if param != None:
-		retdict[name] = param
-    return retdict    
-    
-## get a subset of a dict based on name list
-def dict_subset(map,namelist):
-    retdict = {}
-    for name in namelist: 
-        if name in map:
-            retdict[name] = map[name]
-    return retdict
-
-def store_session(map, save=True):
-    session = get_session()
-    for k,v in map.items():
-        session[k] = v
-    if(save):
-        session.save()
-
 @route('/oauth2/testauthorize')
 @view('oauth2/testauthorize')
 def testauthorize():
     ## process flow for oauth
-    tostore = request_value_dict(['client_id','shared_secret','redirect_uri','base_url','state','suffix_override','token_type'])
-    params = dict_subset(tostore,['client_id','redirect_uri','state'])
+    tostore = services.request_value_dict(['client_id','shared_secret','redirect_uri','base_url','state','suffix_override','token_type'])
+    params = services.dict_subset(tostore,['client_id','redirect_uri','state'])
     params['response_type'] = 'code'
      
-    store_session(tostore, False)
-    s = get_session()
-    if s['state'] is None:
-	s['state'] = s.id
-        params['state'] = s['state']
-    s.save()
+    services.session.store(tostore, False)
+    if services.session.get_attr('state') is None:
+	services.session.put('state',services.session.get_session().id)
+        params['state'] = services.session.get_attr('state')
     
-    consumer_key = get_param('client_id')
-    shared_secret = get_param('shared_secret')
-    base_url =  get_param('base_url')
+    consumer_key = services.get_param('client_id')
+    shared_secret = services.get_param('shared_secret')
+    base_url =  services.get_param('base_url')
     
     oauthclient = oauth2.oauthclient(consumer_key, shared_secret, base_url)
     redirect_url = oauthclient.authorizeRedirect(params=params)
     return dict(link=redirect_url )
 
-## gets the request token from the service
-## based on the suffix 
-def testrequesttoken():
-    return request_token_call()
-
-def request_token_call(secret=None,grant_type='authorization_code',assertion_type=None):
-    ## process flow for oauth
-    params = request_value_dict(['client_id','redirect_uri'])
-    print grant_type
-    if grant_type is 'authorization_code':
-        params['code'] = get_param('code')
-        params['client_secret'] = get_param('shared_secret')
-    elif grant_type is 'refresh_token':
-	# todo implement
-	pass
-    else:
-	## assume its a bearer token flow
-        params['assertion'] = secret
-    params['grant_type'] = grant_type
-    params['format'] = 'json'
-    base_url =  get_param('base_url')
-    suffix_override =  get_param('suffix_override')
-    if suffix_override != None:
-        suffix_override = base_url + '/' + suffix_override
-    oauthclient = oauth2.oauthclient(params['client_id'], get_param('shared_secret'), base_url)
-    sending = oauthclient.toqueryparams(params)
-    try: 
-	request_token = oauthclient.requestToken(suffix_override, params)
-	request_token.update(params);
-	if ('error' in request_token):
-	    request_token['error_description'] = setup.get_message(request_token['error'])
-    except Exception as e:
-	request_token = {}
-	request_token.update(params)
-	request_token['error'] = "Error occured in oAuth Call ({0})".format(e)
-        print (e)
-    except ValueError as ve:
-	request_token = {}
-	request_token.update(params)
-	request_token['error'] = "Input Error occured in oAuth Call ({0})".format(ve)
-    except:
-	request_token = {}
-	request_token.update(params)
-	request_token['error'] = 'Unknown error'
-    if suffix_override != None:	
-	request_token['url_used'] = suffix_override + '?' + sending
-    else:
-	request_token['url_used'] = base_url + '/oauth/request_token?' + sending
-    return request_token
-
-
 @route('/oauth2/callback')
 @view('oauth2/callback')
 def testcallback():
-    values = request_value_dict(['client_id','shared_secret','code','state','error'])
-    request_token = testrequesttoken()
+    values = services.request_value_dict(['client_id','shared_secret','code','state','error'])
+    request_token = oauth2.service.request_token_call()
     if request_token != None:
     	values.update(request_token)
-    	store_session(request_token)
+    	services.session.store(request_token)
 	print request_token
     values['name'] = 'oauth 2 callback'
     return values
@@ -196,20 +106,20 @@ def oauth2_bearerflow():
 @view('oauth2/callback')
 def oauth2_bearerflow_submit():
     values = dict(name='oauth 2 bearer submit flow')
-    token_type = get_param('token_type')
+    token_type = services.get_param('token_type')
     if token_type != None:
         if token_type == 'jwt':
             tojson = {}
-            tojson['iss'] = get_param('client_id')
-            tojson['prn'] = get_param('username')
-	    tojson['aud'] = get_param('aud')
+            tojson['iss'] = services.get_param('client_id')
+            tojson['prn'] = services.get_param('username')
+	    tojson['aud'] = services.get_param('aud')
 	    tojson['iat'] = round(time.time())
             tojson['exp'] = round(time.time() + 300,0)
             secret = json.dumps(tojson)
-            secret = jwt.encode(tojson, get_param('shared_secret'))
+            secret = jwt.encode(tojson, services.get_param('shared_secret'))
             token_type='JWT'
             grant_type = 'http://oauth.net/grant_type/jwt/1.0/bearer'
-            request_token = request_token_call(secret,grant_type,assertion_type=token_type)
+            request_token = oauth2.service.request_token_call(secret,grant_type,assertion_type=token_type)
             values.update(request_token)
 	else:
 	    values = {"error":"No token type provided on form"}
@@ -237,9 +147,6 @@ def oauth2_clientcredentialsflow():
 def oauth2_assertionflow():
     return dict(name='oauth 2 assertionflow')
     
-
-
-
 
 
 ########################
