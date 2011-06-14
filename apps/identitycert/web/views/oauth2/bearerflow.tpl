@@ -33,11 +33,17 @@ Bearer supported as specified in the <a href="http://self-issued.info/docs/draft
     <label>Shared Secret for HMAC</label><br /><input type="text" name="shared_secret" size="90" />
     </p>
     <p>
+    <label>Private Key(pem) for RSA</label><br /><input type="file" name="private_key" size="90" />
+    </p>
+    <p>
+    <label>Public Key(pem) for RSA</label><br /><input type="file" name="public_key" size="90" />
+    </p>
+    <p>
     <label>Bearer Token</label><br />
         <select name="token_type">
             <option value=""> none </option>
             <option value="jwt">JWT</option>
-            <option value="assertion">SAML Assertion</option>
+            <option value="saml">SAML Assertion</option>
         </select>
     </p>
     <p>

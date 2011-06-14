@@ -10,9 +10,11 @@ import time
 import os, sys,  traceback
 import setup
 import lib.oauth2 as oauth2
+import lib.saml2 as saml2
 import json
 import setup
 import lib.services as services
+import saml
 
 cfg = None
 
@@ -108,18 +110,27 @@ def oauth2_bearerflow_submit():
     values = dict(name='oauth 2 bearer submit flow')
     token_type = services.get_param('token_type')
     if token_type != None:
-        if token_type == 'jwt':
+	client_id = services.get_param('client_id')
+        username = services.get_param('username')
+	audience = services.get_param('aud')
+	callback = services.get_param('redirect_uri')
+	if token_type == 'jwt':
             tojson = {}
-            tojson['iss'] = services.get_param('client_id')
-            tojson['prn'] = services.get_param('username')
-	    tojson['aud'] = services.get_param('aud')
+            tojson['iss'] = client_id
+            tojson['prn'] = username
+	    tojson['aud'] = audience
 	    tojson['iat'] = round(time.time())
             tojson['exp'] = round(time.time() + 300,0)
             secret = json.dumps(tojson)
             secret = jwt.encode(tojson, services.get_param('shared_secret'))
-            token_type='JWT'
-            grant_type = 'http://oauth.net/grant_type/jwt/1.0/bearer'
-            request_token = oauth2.service.request_token_call(secret,grant_type,assertion_type=token_type)
+            request_token = oauth2.service.request_token_call(secret,'http://oauth.net/grant_type/jwt/1.0/bearer',assertion_type='JWT')
+            values.update(request_token)
+	elif token_type == 'saml':
+	    privateKey = services.get_file('private_key')
+	    publicKey = services.get_file('public_key')
+	    assertion = saml2.service.buildAssertion(username, audience, clientid, callback)
+	    secret = saml2.services.encodeAssertion(assertion,privateKey, publicKey)
+	    request_token = oauth2.service.request_token_call(secret,'http://oauth.net/grant_type/saml/1.0/bearer',assertion_type='SAML')
             values.update(request_token)
 	else:
 	    values = {"error":"No token type provided on form"}

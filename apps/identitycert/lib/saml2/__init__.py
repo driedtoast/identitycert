@@ -19,9 +19,7 @@ class SamlService(object):
         notBefore = time.strftime("%Y-%m-%dT%H:%M:%SZ",time.gmtime())
         notOnOrAfter = time.strftime("%Y-%m-%dT%H:%M:%SZ",time.gmtime(time.time() + 5))
         conditions = SAML.Conditions(notBefore, notOnOrAfter,audience)
-        assertion = SAML.Assertion(authStatement, clientid, conditions)
-
-        pass
+        return SAML.Assertion(authStatement, clientid, conditions)
     ## encodes in base 64 url
     def encodeAssertion(self,assertion, privatekey, certificate):
         node=assertion.sign(privatekey,certificate)
