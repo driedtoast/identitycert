@@ -8,3 +8,10 @@ APP_DIR="apps"
 TESTS_DIR="tests"
 CONFIG_DIR=conf
 
+
+PKG_MGR="apt-get"
+PRG_CHECK=`which $PKG_MGR`
+if [ ! $PRG_CHECK ]; then
+	PKG_MGR="yum"
+fi
+
