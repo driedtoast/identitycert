@@ -48,9 +48,7 @@ class oauthclient(object):
 		format = params['format']
         resp, content = client.request(uri=request_token_url, method="POST",body=extra)
         if resp['status'] != '200':
-            print content
             raise Exception("Invalid response %s to %s" % (resp['status'],request_token_url))
-	print content
 	if format is 'json':
 		self.request_token = {}
         	jsonobj = json.JSONDecoder().decode(content)
