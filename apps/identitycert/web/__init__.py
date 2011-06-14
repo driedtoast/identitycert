@@ -197,14 +197,14 @@ def oauth2_bearerflow():
 def oauth2_bearerflow_submit():
     values = dict(name='oauth 2 bearer submit flow')
     token_type = get_param('token_type')
-    print token_type
     if token_type != None:
         if token_type == 'jwt':
             tojson = {}
             tojson['iss'] = get_param('client_id')
             tojson['prn'] = get_param('username')
 	    tojson['aud'] = get_param('aud')
-            tojson['exp'] = round(time.time() + 3400,0)
+	    tojson['iat'] = round(time.time())
+            tojson['exp'] = round(time.time() + 300,0)
             secret = json.dumps(tojson)
             secret = jwt.encode(tojson, get_param('shared_secret'))
             token_type='JWT'
