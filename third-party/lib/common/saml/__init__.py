@@ -112,7 +112,7 @@ def insertCertificate(elementRoot, certificate):
   
 class Conditions(object):
   
-  def __init__(self, notBefore=None, notOnOrAfter=None):
+  def __init__(self, notBefore=None, notOnOrAfter=None, audience=None):
 
     if(notBefore == None):
       self.notBefore = time.strftime("%Y-%m-%dT%H:%M:%SZ",time.gmtime())
@@ -123,6 +123,7 @@ class Conditions(object):
       self.notOnOrAfter = time.strftime("%Y-%m-%dT%H:%M:%SZ",time.gmtime(time.time() + 60))
     else:
       self.notOnOrAfter = notOnOrAfter
+    self.audience=audience
     
   def __str__(self):
     return self.getXML()
@@ -135,16 +136,21 @@ class Conditions(object):
     conditionsElement = doc.createElement("Conditions")
     conditionsElement.setAttribute("NotBefore", self.notBefore)
     conditionsElement.setAttribute("NotOnOrAfter", self.notOnOrAfter)
+    if(self.audience != None):
+      audienceRestrictElement = doc.createElement("AudienceRestriction")
+      audienceElement  = doc.createElement("Audience")
+      audienceElement.appendChild(doc.createTextNode(self.audience))
+      audienceRestrictElement.appendChild(audienceElement)
+      conditionsElement.appendChild(audienceRestrictElement)
+      
     return conditionsElement    
     
     
 class AuthenticationStatement(object):
 
-  def __init__(self, subject, authMethod, authInstant):
+  def __init__(self, subject, authInstant):
 
     self.subject = subject
-    self.authMethod = authMethod
-    
     # If there is no authentication instant specified default to the current time
     if(authInstant == None):
       self.authInstant = time.strftime("%Y-%m-%dT%H:%M:%SZ",time.gmtime())
@@ -159,22 +165,26 @@ class AuthenticationStatement(object):
 
   def getXMLNode(self):
     doc = xml.dom.minidom.Document()  
-    authenticationStatementElement = doc.createElement("AuthenticationStatement")
-    authenticationStatementElement.setAttribute("AuthenticationMethod", self.authMethod)
-    authenticationStatementElement.setAttribute("AuthenticationInstant", self.authInstant)     
-    authenticationStatementElement.appendChild(self.subject.getXMLNode())
-    
+    authenticationStatementElement = doc.createElement("AuthnStatement")
+    authenticationStatementElement.setAttribute("AuthnInstant", self.authInstant)     
     return authenticationStatementElement
+  def getSubject(self):
+    return self.subject.getXMLNode()
     
 
 
 # The Subject class specifies who the assertion is about
 class Subject(object):
                 
-  def __init__(self, name, nameidformat,confirmationMethods=[]):
+  def __init__(self, name, nameidformat,confirmationMethod=None,recipient=None,notOnOrAfter=None):
     self.name = name
     self.set_nameidformat(nameidformat)
-    self.confirmationMethods = confirmationMethods
+    self.confirmationMethod = confirmationMethod
+    self.recipient = recipient
+    if(notOnOrAfter == None):
+      self.notOnOrAfter = time.strftime("%Y-%m-%dT%H:%M:%SZ",time.gmtime(time.time() + 60))
+    else:
+      self.notOnOrAfter = notOnOrAfter
 
   def __str__(self):
     return self.getXML()
@@ -193,14 +203,13 @@ class Subject(object):
     nameIDElement.appendChild(nameIDText)
     
     subjectConfirmationElement = doc.createElement("SubjectConfirmation")
-    
-    # Go through the list of confirmation methods
-    for confirmationMethod in self.confirmationMethods:
-      confirmationMethodElement = doc.createElement("ConfirmationMethod")
-      confirmationMethod = doc.createTextNode(confirmationMethod)
-      confirmationMethodElement.appendChild(confirmationMethod)
-      subjectConfirmationElement.appendChild(confirmationMethodElement)
-  
+    if (self.confirmationMethods != None):
+      subjectConfirmationElement.setAttribute("Method",confirmationMethod)
+    if (self.recipient != None):
+      subjectConfirmData = doc.createElement("SubjectConfirmationData")
+      subjectConfirmData.setAttribute("Recipient",self.recipient)
+      subjectConfirmData.setAttribute("NotOnOrAfter",self.notOnOrAfter)
+      subjectConfirmationElement.appendChild(subjectConfirmData)
     subjectElement.appendChild(nameIDElement)
     subjectElement.appendChild(subjectConfirmationElement)
   
@@ -252,33 +261,40 @@ class Assertion(object):
   def getXML(self):
     return self.getXMLNode().toxml()
 
-  def getXMLNode(self):
+  def getXMLNode(self,certificate=None):
   
     doc = xml.dom.minidom.Document()
-    assertionElement = doc.createElementNS("urn:oasis:names:tc:SAML:1.0:assertion", "Assertion")
+    assertionElement = doc.createElementNS("urn:oasis:names:tc:SAML:2.0:assertion", "Assertion")
 
     # MajorVersion [required]
-    assertionElement.setAttribute("MajorVersion","1")
-
-    # MinorVersion [required]
-    assertionElement.setAttribute("MinorVersion","1")
+    assertionElement.setAttribute("Version","2.0")
 
     # AssertionID [required]
-    assertionElement.setAttribute("AssertionID", self.assertionUUID )
+    assertionElement.setAttribute("ID", self.assertionUUID )
 
     # Issuer [required]
-    assertionElement.setAttribute("Issuer",self.issuer)
+    issuerElement = doc.createElement("Issuer")
+    issuerText = doc.createTextNode(self.issuer)
+    issuerElement.appendChild(issuerText)
+    assertionElement.appendChild(issuerElement)
+    assertionElement.appendChild(self.authStatement.getSubject())
 
     # Assertions must have a time in which they were issued/created
     assertionElement.setAttribute("IssueInstant", self.issueInstant )
 
     assertionElement.appendChild(self.conditions.getXMLNode())
-    assertionElement.appendChild(self.authStatement.getXMLNode())
+    authNode = self.authStatement.getXMLNode()
+    if(certificate != None):
+      authContext = doc.createElement("AuthnContext")
+      authContextRef = doc.createElement("AuthnContextClassRef")
+      authContextRef.appendChild(doc.createTextNode("urn:oasis:names:tc:SAML:2.0:ac:classes:X509"))
+      authContext.appendChild(authContextRef)
+      authNode.appendChild(authContext)
+    assertionElement.appendChild(authNode)
 
     return assertionElement
   def sign(self,privateKey,certificate):
-    xmlNode = self.getXMLNode()
-    xmlNode.setAttribute("ID", self.assertionUUID )
+    xmlNode = self.getXMLNode(certificate)
     # If a private key was specified sign the response
     if ( privateKey != None ):
       xmlNode = insertEnvelopedSignature(xmlNode,self.assertionUUID,privateKey)
