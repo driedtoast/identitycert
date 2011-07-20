@@ -3,6 +3,8 @@ import json
 import oauth2 as oauth
 import setup
 import lib.services as services
+import collections
+
 
 ##
 # Simplifies the use of the oauth client just a bit
@@ -42,13 +44,15 @@ class oauthclient(object):
             request_token_url = "%s/request_token" % self.base_url
         client = self.get_client()
         extra = self.toqueryparams(params)
+	
 	format = None
         if params != None:
             if 'format' in params:
 		format = params['format']
         resp, content = client.request(uri=request_token_url, method="POST",body=extra)
         if resp['status'] != '200':
-            raise Exception("Invalid response %s to %s" % (resp['status'],request_token_url))
+	    return (None,content)
+            #raise Exception("Invalid response %s to %s" % (resp['status'],request_token_url))
 	if format is 'json':
 		self.request_token = {}
         	jsonobj = json.JSONDecoder().decode(content)
@@ -57,6 +61,7 @@ class oauthclient(object):
 			
 	else:
         	self.request_token = dict(urlparse.parse_qsl(content))
+	self.request_token['actual_response'] = content
         return self.request_token
 
     def toqueryparams(self,params):
@@ -113,7 +118,8 @@ class oauthclient(object):
         client = oauth.Client(self.get_consumer(), token)
         resp, content = client.request(access_token_url, "POST")
         access_token = dict(urlparse.parse_qsl(content))
-        return access_token
+	access_token['actual_response'] = content
+        return  access_token
 
 
 ### wraps some of the auth calls for the web UI
@@ -142,7 +148,7 @@ class OAuthService(object):
 	    suffix_override = base_url + '/' + suffix_override
 	client = oauthclient(params['client_id'], services.get_param('shared_secret'), base_url)
 	sending = client.toqueryparams(params)
-	try: 
+	try:
 	    request_token = client.requestToken(suffix_override, params)
 	    request_token.update(params);
 	    if ('error' in request_token):

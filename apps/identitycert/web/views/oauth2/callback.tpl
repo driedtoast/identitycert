@@ -37,6 +37,14 @@
 
 </fieldset>
 
+<fieldset>
+    <legend>actual response<legend>
+% if actual_response != UNDEFINED:
+  <p>${actual_response} </p>
+% endif
+
+</fieldset>
+
 
 <fieldset>
     <legend>input values<legend>

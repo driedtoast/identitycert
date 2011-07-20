@@ -60,8 +60,8 @@ def index():
 @view('oauth2/testauthorize')
 def testauthorize():
     ## process flow for oauth
-    tostore = services.request_value_dict(['client_id','shared_secret','redirect_uri','base_url','state','suffix_override','token_type'])
-    params = services.dict_subset(tostore,['client_id','redirect_uri','state'])
+    tostore = services.request_value_dict(['client_id','shared_secret','redirect_uri','base_url','state','suffix_override','token_type','scope'])
+    params = services.dict_subset(tostore,['client_id','redirect_uri','state','scope'])
     params['response_type'] = 'code'
      
     services.session.store(tostore, False)
@@ -80,7 +80,7 @@ def testauthorize():
 @route('/oauth2/callback')
 @view('oauth2/callback')
 def testcallback():
-    values = services.request_value_dict(['client_id','shared_secret','code','state','error'])
+    values = services.request_value_dict(['client_id','shared_secret','code','state','error','scope'])
     request_token = oauth2.service.request_token_call()
     if request_token != None:
     	values.update(request_token)
@@ -130,7 +130,7 @@ def oauth2_bearerflow_submit():
 	    publicKey = services.get_file('public_key')
 	    assertion = saml2.service.buildAssertion(username, audience, clientid, callback)
 	    secret = saml2.services.encodeAssertion(assertion,privateKey, publicKey)
-	    request_token = oauth2.service.request_token_call(secret,'http://oauth.net/grant_type/saml/1.0/bearer',assertion_type='SAML')
+	    request_token = oauth2.service.request_token_call(secret,'urn:oasis:names:tc:SAML:2.0:assertion',assertion_type='SAML')
             values.update(request_token)
 	else:
 	    values = {"error":"No token type provided on form"}
