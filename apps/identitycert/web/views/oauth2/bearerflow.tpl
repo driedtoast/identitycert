@@ -8,7 +8,7 @@
 Bearer supported as specified in the <a href="http://self-issued.info/docs/draft-jones-json-web-token-01.html">JWT Bearer Spec</a>.
 </p>
 
-<form action="/oauth2/bearerflow/submit">
+<form action="/oauth2/bearerflow/submit" method="POST" enctype="multipart/form-data">
 <fieldset> 
     <legend>For normal protocol request</legend> 
     <p>
@@ -33,10 +33,10 @@ Bearer supported as specified in the <a href="http://self-issued.info/docs/draft
     <label>Shared Secret for HMAC</label><br /><input type="text" name="shared_secret" size="90" />
     </p>
     <p>
-    <label>Private Key(pem) for RSA</label><br /><input type="file" name="private_key" size="90" />
+    <label>Private Key(pem) for RSA</label><br /><input type="file" name="privatekey" size="90" />
     </p>
     <p>
-    <label>Public Key(pem) for RSA</label><br /><input type="file" name="public_key" size="90" />
+    <label>Public Key(pem) for RSA</label><br /><input type="file" name="publickey" size="90" />
     </p>
     <p>
     <label>Bearer Token</label><br />

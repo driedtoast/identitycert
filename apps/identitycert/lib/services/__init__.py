@@ -29,9 +29,13 @@ class SessionService(object):
 
 
 def get_file(name):
-    if name in request.files:
-	filereq = request.files.get(name);
+    try:
+	for k, v in request.files.iteritems():
+	    print k + " - " + v
+        filereq = request.files.get(name)
 	return filereq.file.read()
+    except Exception as e:
+	print e
     return None
 
 session = SessionService()

@@ -1,6 +1,6 @@
 from bottle import route, run, abort, debug
 from bottle import mako_view as view
-from bottle import send_file, redirect
+from bottle import static_file, redirect
 from bottle import PasteServer
 from bottle import request, response
 from beaker.middleware import SessionMiddleware
@@ -25,23 +25,23 @@ cfg = None
 
 @route('/static/js/:filename')
 def static_file_js(filename):
-    	send_file(filename, root=setup.staticdir+'/js')
+    	static_file(filename, root=setup.staticdir+'/js')
 
 @route('/static/js/plugins/:filename')
 def static_file_js_plugins(filename):
-    	send_file(filename, root=setup.staticdir+'/js/plugins')
+    	static_file(filename, root=setup.staticdir+'/js/plugins')
 
 @route('/static/templates/:filename')
 def static_file_template(filename):
-    	send_file(filename, root=setup.staticdir+'/templates')
+    	static_file(filename, root=setup.staticdir+'/templates')
 
 @route('/static/css/:dir/images/:filename')
 def static_file_css_images(dir,filename):
-    	send_file(filename, root=setup.staticdir+'/css/'+dir+'/images')
+    	static_file(filename, root=setup.staticdir+'/css/'+dir+'/images')
 
 @route('/static/css/:dir/:filename')
 def static_file_cc(dir,filename):
-	send_file(filename, root=setup.staticdir+'/css/'+dir)
+	static_file(filename, root=setup.staticdir+'/css/'+dir)
 
 ##############################################################
 ### UI methods
@@ -85,7 +85,6 @@ def testcallback():
     if request_token != None:
     	values.update(request_token)
     	services.session.store(request_token)
-	print request_token
     values['name'] = 'oauth 2 callback'
     return values
 
@@ -104,7 +103,7 @@ def oauth2_webserverflow():
 def oauth2_bearerflow():
     return dict(name='oauth 2 bearer flow')
 
-@route('/oauth2/bearerflow/submit')
+@route('/oauth2/bearerflow/submit',method='POST')
 @view('oauth2/callback')
 def oauth2_bearerflow_submit():
     values = dict(name='oauth 2 bearer submit flow')
@@ -126,10 +125,10 @@ def oauth2_bearerflow_submit():
             request_token = oauth2.service.request_token_call(secret,'http://oauth.net/grant_type/jwt/1.0/bearer',assertion_type='JWT')
             values.update(request_token)
 	elif token_type == 'saml':
-	    privateKey = services.get_file('private_key')
-	    publicKey = services.get_file('public_key')
-	    assertion = saml2.service.buildAssertion(username, audience, clientid, callback)
-	    secret = saml2.services.encodeAssertion(assertion,privateKey, publicKey)
+	    privateKey = services.get_file('privatekey')
+	    publicKey = services.get_file('publickey')
+	    assertion = saml2.service.buildAssertion(username, audience, client_id, callback)
+	    secret = saml2.service.encodeAssertion(assertion,privateKey, publicKey)
 	    request_token = oauth2.service.request_token_call(secret,'urn:oasis:names:tc:SAML:2.0:assertion',assertion_type='SAML')
             values.update(request_token)
 	else:
