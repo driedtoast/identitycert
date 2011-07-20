@@ -16,9 +16,9 @@ class SAMLMessages():
     subjectConfirmationElement = doc.createElement("SubjectConfirmation")
     
     # Go through the list of confirmation methods
-    for confirmationMethod in subject.confirmationMethods:
+    if subject.confirmationMethod != None:
       confirmationMethodElement = doc.createElement("ConfirmationMethod")
-      confirmationMethod = doc.createTextNode(confirmationMethod)
+      confirmationMethod = doc.createTextNode(subject.confirmationMethod)
       confirmationMethodElement.appendChild(confirmationMethod)
       subjectConfirmationElement.appendChild(confirmationMethodElement)
   

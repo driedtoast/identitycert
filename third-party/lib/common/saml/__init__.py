@@ -18,6 +18,7 @@ def log(loglevel, logfilename):
 
 
 def encodeXml(obj):
+  print obj.toxml()
   return base64.urlsafe_b64encode(obj.toxml()).replace('=','')
 
 def getBase64EncodedXML(obj):
@@ -25,7 +26,7 @@ def getBase64EncodedXML(obj):
   return base64string
 
 def insertEnvelopedSignature(unsignedSAMLResponse, responseId, privatekey):
-  doc = xml.dom.minidom.Document()
+  doc = unsignedSAMLResponse
   signatureElement = doc.createElementNS("http://www.w3.org/2000/09/xmldsig#", "Signature")
   signedInfoElement = doc.createElement("SignedInfo")
   canonicalizationMethodElement = doc.createElement("CanonicalizationMethod")
@@ -52,6 +53,7 @@ def insertEnvelopedSignature(unsignedSAMLResponse, responseId, privatekey):
   digestMethodElement.setAttribute("Algorithm","http://www.w3.org/2000/09/xmldsig#sha1")
   
   referenceElement.appendChild(digestMethodElement)
+  print unsignedSAMLResponse.toxml()
 
   # Perform the actual hashing
   digestValueElement = doc.createElement("DigestValue")
@@ -80,7 +82,7 @@ def insertEnvelopedSignature(unsignedSAMLResponse, responseId, privatekey):
 
 
 def insertCertificate(elementRoot, certificate):
-  doc = xml.dom.minidom.Document()
+  doc = elementRoot
 
   # Pull the <signature> element
   signatureElement = elementRoot.getElementsByTagName("Signature").item(0)
@@ -197,14 +199,14 @@ class Subject(object):
     subjectElement = doc.createElement("Subject")
     
     # <NameIdentifier>
-    nameIDElement = doc.createElement("NameIdentifier")
+    nameIDElement = doc.createElement("NameID")
     nameIDElement.setAttribute("Format",self.nameidformat)
     nameIDText = doc.createTextNode(self.name)
     nameIDElement.appendChild(nameIDText)
     
     subjectConfirmationElement = doc.createElement("SubjectConfirmation")
-    if (self.confirmationMethods != None):
-      subjectConfirmationElement.setAttribute("Method",confirmationMethod)
+    if (self.confirmationMethod != None):
+      subjectConfirmationElement.setAttribute("Method",self.confirmationMethod)
     if (self.recipient != None):
       subjectConfirmData = doc.createElement("SubjectConfirmationData")
       subjectConfirmData.setAttribute("Recipient",self.recipient)
@@ -294,6 +296,9 @@ class Assertion(object):
 
     return assertionElement
   def sign(self,privateKey,certificate):
+    print 'cert is :'
+    print certificate
+    print privateKey
     xmlNode = self.getXMLNode(certificate)
     # If a private key was specified sign the response
     if ( privateKey != None ):

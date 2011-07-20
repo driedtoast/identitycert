@@ -768,7 +768,7 @@ class BaseRequest(DictMixin):
         convenient access methods and properties. Most of them are read-only."""
 
     #: Maximum size of memory buffer for :attr:`body` in bytes.
-    MEMFILE_MAX = 102400
+    MEMFILE_MAX = 1024
 
     def __init__(self, environ):
         """ Wrap a WSGI environ dictionary. """
@@ -925,7 +925,7 @@ class BaseRequest(DictMixin):
         if NCTextIOWrapper:
             fb = NCTextIOWrapper(self.body, encoding='ISO-8859-1', newline='\n')
         else:
-            fb = self.body
+	    fb = self.body
         data = cgi.FieldStorage(fp=fb, environ=safe_env, keep_blank_values=True)
         for item in data.list or []:
             post[item.name] = item if item.filename else item.value
