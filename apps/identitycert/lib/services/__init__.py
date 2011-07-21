@@ -1,4 +1,6 @@
 from bottle import request, response
+import cgi
+import cgitb; cgitb.enable()
 
 
 ## simple wrapper for session stuff
@@ -27,12 +29,15 @@ class SessionService(object):
         sess[name] = value
         sess.save()
 
+def request():
+    return request
 
 def get_file(name):
     try:
-	for k, v in request.files.iteritems():
+	print request()[name]
+	for k, v in request().files.iteritems():
 	    print k + " - " + v
-        filereq = request.files.get(name)
+        filereq = request().files.get(name)
 	return filereq.file.read()
     except Exception as e:
 	print e

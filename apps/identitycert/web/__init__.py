@@ -1,10 +1,11 @@
 from bottle import route, run, abort, debug
 from bottle import mako_view as view
 from bottle import static_file, redirect
-from bottle import PasteServer
+from bottle import WSGIRefServer
 from bottle import request, response
 from beaker.middleware import SessionMiddleware
 import jwt
+#import ext.werkzeug
 import bottle
 import time
 import os, sys,  traceback
@@ -166,6 +167,9 @@ def oauth2_assertionflow():
 def startweb(host,port,runmode=True):
 	bottle.TEMPLATE_PATH.insert(0,os.path.dirname( os.path.realpath( __file__ ))+'/views/')
 	app = bottle.default_app()
+	#werkzeug = ext.werkzeug.Plugin()
+	#app.install(werkzeug)
+	# services.requestprovider=werkzeug
 	session_opts = {
     		'session.type': 'file',
     		'session.cookie_expires': 300,
@@ -174,6 +178,6 @@ def startweb(host,port,runmode=True):
 	}
 	app = SessionMiddleware(app,session_opts)
 	if runmode:
-		run(server=PasteServer,host=host, port=port,app=app)
+		run(server=WSGIRefServer,host=host, port=port,app=app)
 	return app
 
