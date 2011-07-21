@@ -29,18 +29,17 @@ class SessionService(object):
         sess[name] = value
         sess.save()
 
-def request():
-    return request
 
 def get_file(name):
-    try:
-	print request()[name]
-	for k, v in request().files.iteritems():
-	    print k + " - " + v
-        filereq = request().files.get(name)
-	return filereq.file.read()
-    except Exception as e:
-	print e
+    #try:
+	#print request()[name]
+	#for k, v in request().files.iteritems():
+	#    print k + " - " + v
+        
+	#filereq = request().files.get(name)
+	#return filereq.file.read()
+    #except Exception as e:
+	#print e
     return None
 
 session = SessionService()
@@ -48,9 +47,9 @@ session = SessionService()
 
 ## Gets param from session or session    
 def get_param(name):
-    if name in request.GET:
+    if request.GET and name in request.GET:
         return request.GET[name]
-    if name in request.POST:
+    if request.POST and name in request.POST:
         return request.POST[name]
     return session.get_attr(name)
     
