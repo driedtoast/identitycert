@@ -119,9 +119,9 @@ def oauth2_bearerflow_submit():
 	publicKey = None
 	if(keysign != None and keysign == 'on'):
 		privateKeyFile = open(setup.staticdir + '/mycert-private.pem', 'r')
-		privateKey = privateKeyFile.read()
+		privateKey = privateKeyFile
 		publicKeyFile = open(setup.staticdir + '/mycert.pem', 'r')
-		publicKey = publicKeyFile.read()
+		publicKey = publicKeyFile
 	if token_type == 'jwt':
             tojson = {}
             tojson['iss'] = client_id
@@ -133,14 +133,14 @@ def oauth2_bearerflow_submit():
 	    key = services.get_param('shared_secret')
 	    algorithm = 'HS256' # RS256
 	    if(privateKey != None):
-		key = privateKey
+		key = setup.staticdir + '/mycert-private.pem'
 		algorithm = 'RS256' 
             secret = jwt.encode(tojson,key,algorithm )
             request_token = oauth2.service.request_token_call(secret,'http://oauth.net/grant_type/jwt/1.0/bearer',assertion_type='JWT')
             values.update(request_token)
-	elif token_type == 'saml':
+	elif token_type == 'saml' and keysign:
 	    assertion = saml2.service.buildAssertion(username, audience, client_id, callback)
-	    secret = saml2.service.encodeAssertion(assertion,privateKey, publicKey)
+	    secret = saml2.service.encodeAssertion(assertion,privateKey.read(), publicKey.read())
 	    request_token = oauth2.service.request_token_call(secret,'urn:oasis:names:tc:SAML:2.0:assertion',assertion_type='SAML')
             values.update(request_token)
 	else:
