@@ -1,4 +1,4 @@
-<%include file="../header.html"/>
+<%include file="/header.html"/>
 
 <h1 class="fancy">${name}</h1>
 
@@ -22,4 +22,4 @@ Add cert to the list.
 </div>
 
 
-<%include file="../footer.html"/>
+<%include file="/footer.html"/>

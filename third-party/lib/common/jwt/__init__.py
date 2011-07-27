@@ -6,6 +6,8 @@ http://self-issued.info/docs/draft-jones-json-web-token-01.html
 import base64
 import hashlib
 import hmac
+import M2Crypto
+from M2Crypto import BIO, RSA, EVP
 
 try:
     import json
@@ -20,7 +22,16 @@ signing_methods = {
     'HS256': lambda msg, key: hmac.new(key, msg, hashlib.sha256).digest(),
     'HS384': lambda msg, key: hmac.new(key, msg, hashlib.sha384).digest(),
     'HS512': lambda msg, key: hmac.new(key, msg, hashlib.sha512).digest(),
+    'RS256': lambda msg, key: signwithkey(msg,key),
 }
+
+def signwithkey(msg, privatekey):
+    print 'TO SIGN: ' + msg
+    key = EVP.load_key(privatekey)
+    key.reset_context(md='sha256')
+    key.sign_init()
+    key.sign_update(msg)
+    return key.sign_final()
 
 def base64url_decode(input):
     input += '=' * (4 - (len(input) % 4))
@@ -43,10 +54,14 @@ def encode(payload, key, algorithm='HS256'):
     segments.append(base64url_encode(json.dumps(payload)))
     signing_input = '.'.join(segments)
     try:
-        ascii_key = unicode(key).encode('utf8')
-        signature = signing_methods[algorithm](signing_input, ascii_key)
+        if algorithm == 'RS265':
+            ascii_key = key
+        else:
+            ascii_key = unicode(key).encode('utf8')
+        signature = signing_methods[algorithm](signing_input, key)
     except KeyError:
         raise NotImplementedError("Algorithm not supported")
+    print 'SIGN BASE: ' + base64url_encode(signature)
     segments.append(base64url_encode(signature))
     return '.'.join(segments)
 

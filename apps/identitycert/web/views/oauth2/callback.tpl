@@ -1,4 +1,4 @@
-<%include file="../header.html"/>
+<%include file="/header.html"/>
 
 
 <h1 class="fancy">Callback Status</h1>
@@ -71,4 +71,4 @@
 </div>
 
 
-<%include file="../footer.html"/>
+<%include file="/footer.html"/>

@@ -1,4 +1,4 @@
-<%include file="../header.html"/>
+<%include file="/header.html"/>
 
 <h1 class="fancy">${name}</h1>
 
@@ -55,4 +55,4 @@ Flow supported as specified in the <a href="http://tools.ietf.org/html/draft-iet
     </div>
 </div>
 
-<%include file="../footer.html"/>
+<%include file="/footer.html"/>

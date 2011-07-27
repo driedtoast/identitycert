@@ -26,7 +26,7 @@ def getBase64EncodedXML(obj):
   return base64string
 
 def insertEnvelopedSignature(unsignedSAMLResponse, responseId, privatekey):
-  doc = unsignedSAMLResponse
+  doc = xml.dom.minidom.Document()
   signatureElement = doc.createElementNS("http://www.w3.org/2000/09/xmldsig#", "Signature")
   signedInfoElement = doc.createElement("SignedInfo")
   canonicalizationMethodElement = doc.createElement("CanonicalizationMethod")
@@ -53,8 +53,7 @@ def insertEnvelopedSignature(unsignedSAMLResponse, responseId, privatekey):
   digestMethodElement.setAttribute("Algorithm","http://www.w3.org/2000/09/xmldsig#sha1")
   
   referenceElement.appendChild(digestMethodElement)
-  print unsignedSAMLResponse.toxml()
-
+ 
   # Perform the actual hashing
   digestValueElement = doc.createElement("DigestValue")
   hash = hashlib.sha1()
@@ -82,7 +81,7 @@ def insertEnvelopedSignature(unsignedSAMLResponse, responseId, privatekey):
 
 
 def insertCertificate(elementRoot, certificate):
-  doc = elementRoot
+  doc = xml.dom.minidom.Document()
 
   # Pull the <signature> element
   signatureElement = elementRoot.getElementsByTagName("Signature").item(0)
@@ -108,7 +107,7 @@ def insertCertificate(elementRoot, certificate):
   x509DataElement.appendChild(x509CertificateElement)
   keyInfoElement.appendChild(x509DataElement)
   signatureElement.appendChild(keyInfoElement)
-
+  elementRoot.appendChild(signatureElement)
   return elementRoot
 
   
@@ -296,9 +295,6 @@ class Assertion(object):
 
     return assertionElement
   def sign(self,privateKey,certificate):
-    print 'cert is :'
-    print certificate
-    print privateKey
     xmlNode = self.getXMLNode(certificate)
     # If a private key was specified sign the response
     if ( privateKey != None ):

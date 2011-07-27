@@ -1,4 +1,4 @@
-<%include file="../header.html"/>
+<%include file="/header.html"/>
 
 <h1 class="fancy">${name}</h1>
 
@@ -70,4 +70,4 @@ Bearer supported as specified in the <a href="http://self-issued.info/docs/draft
     </div>
 </div>
 
-<%include file="../footer.html"/>
+<%include file="/footer.html"/>

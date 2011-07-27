@@ -1,4 +1,4 @@
-<%include file="../header.html"/>
+<%include file="/header.html"/>
 
 
 <h1 class="fancy">${name}</h1>
@@ -58,4 +58,4 @@ GET /authorize?type=user_agent&client_id=s6BhdRkqt3&
 
 </div>
 
-<%include file="../footer.html"/>
+<%include file="/footer.html"/>

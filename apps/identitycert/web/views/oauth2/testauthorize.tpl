@@ -1,4 +1,4 @@
-<%include file="../header.html"/>
+<%include file="/header.html"/>
 
 
 <h1 class="fancy">URL in the redirect</h1>
@@ -23,4 +23,4 @@ This normally will happen without a click, but this gives you a chance to review
 
 </div>
 
-<%include file="../footer.html"/>
+<%include file="/footer.html"/>

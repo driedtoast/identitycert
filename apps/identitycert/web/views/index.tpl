@@ -2,7 +2,7 @@
 
 <h1 class="fancy">OAuth 2 Flows</h1>
 
-<div class="span-16">
+<div class="span-16 last">
 <p>
 OAuth 2 Flows are derived from: <a href="http://hueniverse.com/2010/05/introducing-oauth-2-0/">hueuniverse oauth intro</a>.
 </p>
@@ -25,7 +25,7 @@ OAuth 2 Bearer Flows
 
 <h1 class="fancy">Certificate</h1>
 
-<div class="span-16">
+<div class="span-16 last">
 <ul>
 <li><a href="/cert/list">Cert list</a> </li>
 </ul>
