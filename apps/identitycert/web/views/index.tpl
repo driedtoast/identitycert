@@ -1,4 +1,4 @@
-<%include file="header.html"/>
+<%include file="/header.html"/>
 
 <h1 class="fancy">OAuth 2 Flows</h1>
 
@@ -31,4 +31,4 @@ OAuth 2 Bearer Flows
 </ul>
 </div>
 
-<%include file="footer.html"/>
+<%include file="/footer.html"/>
