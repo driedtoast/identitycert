@@ -110,7 +110,9 @@ def oauth2_webserverflow():
 @route('/oauth2/bearerflow')
 @view('oauth2/bearerflow')
 def oauth2_bearerflow():
-    return dict(name='oauth 2 bearer flow')
+    service = services.KeyService()	
+    list = service.list()
+    return dict(name='oauth 2 bearer flow', certs=list)
 
 @route('/oauth2/bearerflow/submit',method='POST')
 @view('oauth2/callback')
@@ -123,12 +125,13 @@ def oauth2_bearerflow_submit():
 	audience = services.get_param('aud')
 	callback = services.get_param('redirect_uri')
 	keysign = services.get_param('keysign')
+	keyname = services.get_param('keyname')
 	privateKey = None
 	publicKey = None
-	if(keysign != None and keysign == 'on'):
-		privateKeyFile = open(setup.staticdir + '/mycert-private.pem', 'r')
+	if(keysign != None and keysign == 'on' and keyname != None):
+		privateKeyFile = open(setup.keydir  +'/' + keyname + '/private.pem', 'r')
 		privateKey = privateKeyFile
-		publicKeyFile = open(setup.staticdir + '/mycert.pem', 'r')
+		publicKeyFile = open(setup.keydir +'/' + keyname + '/public.pem', 'r')
 		publicKey = publicKeyFile
 	if token_type == 'jwt':
             tojson = {}
