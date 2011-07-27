@@ -19,16 +19,14 @@ OAuth 2 Bearer Flows
 </p>
 <ul>
 <li><a href="/oauth2/bearerflow">Bearer Flow</a> </li>
+
 </ul>
 
-</div>
-
 <h1 class="fancy">Certificate</h1>
-
-<div class="span-16 last">
 <ul>
 <li><a href="/cert/list">Cert list</a> </li>
 </ul>
+
 </div>
 
 <%include file="/footer.html"/>
