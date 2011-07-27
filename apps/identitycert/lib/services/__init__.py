@@ -1,7 +1,34 @@
 from bottle import request, response
-import cgi
+import cgi, os
 import cgitb; cgitb.enable()
+import setup
+import M2Crypto
 
+def empty_callback ():
+    return
+
+## Gets a list of keys
+## Generates keys and stores them
+class KeyService(object):
+    def __init__(self):
+	pass
+    
+    def list(self):
+	l = []
+	for root, dirs, files in os.walk(setup.keydir):
+	    for name in dirs:       
+		l.append(name)
+        return l
+    
+    def addCert(self, name):
+	dirn = setup.keydir+'/'+name
+	if os.path.exists(dirn) == False:
+	    os.mkdir(dirn)
+	key = M2Crypto.RSA.gen_key (256, 65537,empty_callback)
+	key.save_key (dirn + '/private.pem',None)
+	key.save_pub_key (dirn + '/public.pem')
+	## create keys
+	pass 
 
 ## simple wrapper for session stuff
 class SessionService(object):

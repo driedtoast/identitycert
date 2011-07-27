@@ -23,5 +23,12 @@ OAuth 2 Bearer Flows
 
 </div>
 
+<h1 class="fancy">Certificate</h1>
+
+<div class="span-16">
+<ul>
+<li><a href="/cert/list">Cert list</a> </li>
+</ul>
+</div>
 
 <%include file="footer.html"/>

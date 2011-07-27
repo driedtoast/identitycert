@@ -5,6 +5,7 @@ import gettext
 ## directories
 basedir = sys.path[0]
 staticdir = basedir + '/static'
+keydir = staticdir + '/keys'
 confdir = basedir + '/conf'
 datadir = basedir + '/data'
 jobsdir = None

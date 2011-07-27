@@ -43,6 +43,10 @@ def static_file_css_images(dir,filename):
 @route('/static/css/:dir/:filename')
 def static_file_cc(dir,filename):
 	static_file(filename, root=setup.staticdir+'/css/'+dir)
+	
+@route('/static/keys/:dir/:filename')
+def static_file_keys(dir,filename):
+	static_file(filename, root=setup.staticdir+'/keys/'+dir)	
 
 ##############################################################
 ### UI methods
@@ -54,6 +58,29 @@ def static_file_cc(dir,filename):
 def index():
     return dict(name='index')
 
+### cert management
+@route('/cert/list')
+@view('cert/list')
+def certlist():
+    service = services.KeyService()	
+    list = service.list()
+    return dict(name='cert list', certs=list)
+    
+@route('/cert/add')
+@view('cert/add')
+def certadd():
+    return dict(name='add cert')
+    
+@route('/cert/save')
+@view('cert/list')
+def certsave():
+    service = services.KeyService()
+    name = services.get_param('name')
+    service.addCert(name)
+    list = service.list()
+    return dict(name='add cert',certs=list)
+    
+    
 
 ### OAUTH 2 flows
 
