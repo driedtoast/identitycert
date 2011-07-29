@@ -16,7 +16,7 @@ Add cert to the list.
 </fieldset>
 
 <p>
-<input type="submit" value="send redirect" />
+<input type="submit" value="save" />
 </p>
 </form>
 </div>

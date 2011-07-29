@@ -1,8 +1,10 @@
 from bottle import request, response
-import cgi, os
+import cgi, os, time
 import cgitb; cgitb.enable()
 import setup
+import subprocess
 import M2Crypto
+from OpenSSL import crypto
 
 MBSTRING_FLAG = 0x1000
 MBSTRING_ASC  = MBSTRING_FLAG | 1
@@ -28,52 +30,84 @@ class KeyService(object):
 	dirn = setup.keydir+'/'+name
 	if os.path.exists(dirn) == False:
 	    os.mkdir(dirn)
-	key = M2Crypto.RSA.gen_key (256, 65537,empty_callback)
-	key.save_key (dirn + '/private.pem',None)
-	pkey = M2Crypto.EVP.PKey ( md='sha1')
-	pkey.assign_rsa ( key )
-	self.createPublicCert(pkey,dirn)
+	    
+	## hackeriffic, something is odd with the way m2crypto and openssl generate keys related to how this works
+	# openssl req -x509 -nodes -days 365 -newkey rsa:1024 -keyout private.pem -out public.pem
+	# args = ['openssl','req','-x509','-nodes','-days', '365', '-newkey', 'rsa:1024', '-keyout', dirn + '/private.pem', '-out',dirn + '/public.pem','-batch']
+	# subprocess.call(args)
+	# openssl x509 -in public.pem -out public_der.pem -outform der
+	# args = ['openssl','x509','-in',dirn + '/public.pem','-out',dirn + '/public_der.pem','-outform','der']
+	# subprocess.call(args)
+	pkey = crypto.PKey()
+	pkey.generate_key(crypto.TYPE_RSA, 1024)
+        digest='md5'
+       
+	req = crypto.X509Req()
+	subj = req.get_subject()
+	subj.CN='Certificate Authority'
+	 
+	req.set_pubkey(pkey)
+	req.sign(pkey, digest)
+       
+       
+	cert = crypto.X509()
+	cert.set_serial_number(0)
+	cert.gmtime_adj_notBefore(0)
+	cert.gmtime_adj_notAfter(60*60*24*365*5)
+	cert.set_issuer(req.get_subject())
+	cert.set_subject(req.get_subject())
+	cert.set_pubkey(req.get_pubkey())
+	cert.sign(pkey, digest)
 	
-	pass
-    def createPublicCert(self,pkey, dirn):
-	## create request
-	x509Request = M2Crypto.X509.Request ()
-	X509ReqName = M2Crypto.X509.X509_Name ()
-	X509ReqName.add_entry_by_txt ( field='C',            type=MBSTRING_ASC, entry='austria',               len=-1, loc=-1, set=0 )    # country name
-	X509ReqName.add_entry_by_txt ( field='SP',           type=MBSTRING_ASC, entry='kernten',               len=-1, loc=-1, set=0 )    # state of province name
-	X509ReqName.add_entry_by_txt ( field='L',            type=MBSTRING_ASC, entry='stgallen',              len=-1, loc=-1, set=0 )    # locality name
-	X509ReqName.add_entry_by_txt ( field='O',            type=MBSTRING_ASC, entry='labor',                 len=-1, loc=-1, set=0 )    # organization name
-	X509ReqName.add_entry_by_txt ( field='OU',           type=MBSTRING_ASC, entry='it-department',         len=-1, loc=-1, set=0 )    # organizational unit name
-	X509ReqName.add_entry_by_txt ( field='CN',           type=MBSTRING_ASC, entry='Certificate client',    len=-1, loc=-1, set=0 )    # common name
-	X509ReqName.add_entry_by_txt ( field='Email',        type=MBSTRING_ASC, entry='user@localhost',        len=-1, loc=-1, set=0 )    # pkcs9 email address
-	X509ReqName.add_entry_by_txt ( field='emailAddress', type=MBSTRING_ASC, entry='user@localhost',        len=-1, loc=-1, set=0 )    # pkcs9 email address     
-	x509Request.set_subject_name( X509ReqName )
-	x509Request.set_pubkey ( pkey=pkey )
-	x509Request.sign ( pkey=pkey, md='sha1' )
+	open(dirn + '/private.pem', 'w').write(crypto.dump_privatekey(crypto.FILETYPE_PEM, pkey))
+	open(dirn + '/public.pem', 'w').write(crypto.dump_certificate(crypto.FILETYPE_PEM, cert))
+	pubkey = M2Crypto.X509.load_cert(dirn + '/public.pem')
+	pubkey.save(dirn + '/public_der.pem',format=M2Crypto.X509.FORMAT_DER)
+	# THIS SEGFAULTS
+	# key = M2Crypto.RSA.gen_key (1024, 65537,empty_callback)
+	# key.save_key (dirn + '/private.pem',None)
+	# self.createPublicCert(key,dirn)
 
-	## create x509
-	x509Certificate =  M2Crypto.X509.X509 ()
-	x509Certificate.set_version ( 0 )
-	ASN1 = M2Crypto.ASN1.ASN1_UTCTIME ()
-	ASN1.set_time ( 500 )
-	x509Certificate.set_not_before( ASN1 )
-	x509Certificate.set_not_after( ASN1 )
-	x509Certificate.set_pubkey ( pkey=pkey )
-	x509Name = x509Request.get_subject ()
-	x509Certificate.set_subject_name( x509Name )
-	x509Name = M2Crypto.X509.X509_Name ( M2Crypto.m2.x509_name_new () )
-	x509Name.add_entry_by_txt ( field='C',            type=MBSTRING_ASC, entry='germany',               len=-1, loc=-1, set=0 )    # country name
-	x509Name.add_entry_by_txt ( field='SP',           type=MBSTRING_ASC, entry='bavaria',               len=-1, loc=-1, set=0 )    # state of province name
-	x509Name.add_entry_by_txt ( field='L',            type=MBSTRING_ASC, entry='munich',                len=-1, loc=-1, set=0 )    # locality name
-	x509Name.add_entry_by_txt ( field='O',            type=MBSTRING_ASC, entry='sbs',                   len=-1, loc=-1, set=0 )    # organization name
-	x509Name.add_entry_by_txt ( field='OU',           type=MBSTRING_ASC, entry='it-department',         len=-1, loc=-1, set=0 )    # organizational unit name
-	x509Name.add_entry_by_txt ( field='CN',           type=MBSTRING_ASC, entry='Certificate Authority', len=-1, loc=-1, set=0 )    # common name
-	x509Name.add_entry_by_txt ( field='Email',        type=MBSTRING_ASC, entry='admin@localhost',       len=-1, loc=-1, set=0 )    # pkcs9 email address
-	x509Name.add_entry_by_txt ( field='emailAddress', type=MBSTRING_ASC, entry='admin@localhost',       len=-1, loc=-1, set=0 )    # pkcs9 email address
-	x509Certificate.set_issuer_name( x509Name )
-	x509Certificate.sign( pkey=pkey, md='sha1' )
-	x509Certificate.save(dirn + '/public.pem')
+    def createPublicCert(self,key, dirn):
+	pkey = M2Crypto.EVP.PKey ()
+	pkey.assign_rsa ( key )
+	## create request
+	x = M2Crypto.X509.Request ()
+	x.set_pubkey(pkey)
+	name = x.get_subject()
+	name.C="US"
+	name.CN = "Identity Cert Group"
+	ext1 = M2Crypto.X509.new_extension('subjectAltName', 'DNS:foobar.example.com')
+	ext2 = M2Crypto.X509.new_extension('nsComment', 'Hello there')
+	extstack = M2Crypto.X509.X509_Extension_Stack()
+	extstack.push(ext1)
+	extstack.push(ext2)
+	x.add_extensions(extstack)
+	x.sign(pkey,'md5')
+	x.save_pem( dirn + '/public.pem')
 	
+	pkey = x.get_pubkey()
+        sub = x.get_subject()
+        cert = M2Crypto.X509.X509()
+        cert.set_serial_number(1)
+        cert.set_version(2)
+        cert.set_subject(sub)
+        t = long(time.time()) + time.timezone
+        now = M2Crypto.ASN1.ASN1_UTCTIME()
+        now.set_time(t)
+        nowPlusYear = M2Crypto.ASN1.ASN1_UTCTIME()
+        nowPlusYear.set_time(t + 60 * 60 * 24 * 365)
+        cert.set_not_before(now)
+        cert.set_not_after(nowPlusYear)
+        issuer = M2Crypto.X509.X509_Name()
+        issuer.C = "US"
+        issuer.CN = "Identity Cert Group"
+        cert.set_issuer(issuer)
+        cert.set_pubkey(pkey) 
+        ext = M2Crypto.X509.new_extension('basicConstraints', 'CA:TRUE')
+        cert.add_ext(ext)
+        cert.sign(pkey, 'md5')
+	cert.save( dirn + '/public_der.pem',format=M2Crypto.X509.FORMAT_DER )
 
 ## simple wrapper for session stuff
 class SessionService(object):

@@ -144,7 +144,7 @@ def oauth2_bearerflow_submit():
 	    key = services.get_param('shared_secret')
 	    algorithm = 'HS256' # RS256
 	    if(privateKey != None):
-		key = setup.staticdir + '/mycert-private.pem'
+		key = setup.keydir  +'/' + keyname + '/private.pem' # setup.staticdir + '/mycert-private.pem'
 		algorithm = 'RS256' 
             secret = jwt.encode(tojson,key,algorithm )
             request_token = oauth2.service.request_token_call(secret,'http://oauth.net/grant_type/jwt/1.0/bearer',assertion_type='JWT')

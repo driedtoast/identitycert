@@ -9,7 +9,7 @@
 <fieldset>
     <legend>List of certs<legend>
     % for cert in certs:
- <p> <label>${cert}:</label> <a href="/static/keys/${cert}/public.pem">public key</a> |  <a href="/static/keys/${cert}/private.pem">private key</a>  </p>
+ <p> <label>${cert}:</label> <a href="/static/keys/${cert}/public.pem">public key</a>|  <a href="/static/keys/${cert}/public_der.pem">public der key</a> |  <a href="/static/keys/${cert}/private.pem">private key</a>  </p>
     % endfor
 </fieldset>
 
