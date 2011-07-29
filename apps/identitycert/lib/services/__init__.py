@@ -4,7 +4,11 @@ import cgitb; cgitb.enable()
 import setup
 import M2Crypto
 
-def empty_callback ():
+MBSTRING_FLAG = 0x1000
+MBSTRING_ASC  = MBSTRING_FLAG | 1
+MBSTRING_BMP  = MBSTRING_FLAG | 2
+
+def empty_callback ( *args):
     return
 
 ## Gets a list of keys
@@ -26,9 +30,50 @@ class KeyService(object):
 	    os.mkdir(dirn)
 	key = M2Crypto.RSA.gen_key (256, 65537,empty_callback)
 	key.save_key (dirn + '/private.pem',None)
-	key.save_pub_key (dirn + '/public.pem')
-	## create keys
-	pass 
+	pkey = M2Crypto.EVP.PKey ( md='sha1')
+	pkey.assign_rsa ( key )
+	self.createPublicCert(pkey,dirn)
+	
+	pass
+    def createPublicCert(self,pkey, dirn):
+	## create request
+	x509Request = M2Crypto.X509.Request ()
+	X509ReqName = M2Crypto.X509.X509_Name ()
+	X509ReqName.add_entry_by_txt ( field='C',            type=MBSTRING_ASC, entry='austria',               len=-1, loc=-1, set=0 )    # country name
+	X509ReqName.add_entry_by_txt ( field='SP',           type=MBSTRING_ASC, entry='kernten',               len=-1, loc=-1, set=0 )    # state of province name
+	X509ReqName.add_entry_by_txt ( field='L',            type=MBSTRING_ASC, entry='stgallen',              len=-1, loc=-1, set=0 )    # locality name
+	X509ReqName.add_entry_by_txt ( field='O',            type=MBSTRING_ASC, entry='labor',                 len=-1, loc=-1, set=0 )    # organization name
+	X509ReqName.add_entry_by_txt ( field='OU',           type=MBSTRING_ASC, entry='it-department',         len=-1, loc=-1, set=0 )    # organizational unit name
+	X509ReqName.add_entry_by_txt ( field='CN',           type=MBSTRING_ASC, entry='Certificate client',    len=-1, loc=-1, set=0 )    # common name
+	X509ReqName.add_entry_by_txt ( field='Email',        type=MBSTRING_ASC, entry='user@localhost',        len=-1, loc=-1, set=0 )    # pkcs9 email address
+	X509ReqName.add_entry_by_txt ( field='emailAddress', type=MBSTRING_ASC, entry='user@localhost',        len=-1, loc=-1, set=0 )    # pkcs9 email address     
+	x509Request.set_subject_name( X509ReqName )
+	x509Request.set_pubkey ( pkey=pkey )
+	x509Request.sign ( pkey=pkey, md='sha1' )
+
+	## create x509
+	x509Certificate =  M2Crypto.X509.X509 ()
+	x509Certificate.set_version ( 0 )
+	ASN1 = M2Crypto.ASN1.ASN1_UTCTIME ()
+	ASN1.set_time ( 500 )
+	x509Certificate.set_not_before( ASN1 )
+	x509Certificate.set_not_after( ASN1 )
+	x509Certificate.set_pubkey ( pkey=pkey )
+	x509Name = x509Request.get_subject ()
+	x509Certificate.set_subject_name( x509Name )
+	x509Name = M2Crypto.X509.X509_Name ( M2Crypto.m2.x509_name_new () )
+	x509Name.add_entry_by_txt ( field='C',            type=MBSTRING_ASC, entry='germany',               len=-1, loc=-1, set=0 )    # country name
+	x509Name.add_entry_by_txt ( field='SP',           type=MBSTRING_ASC, entry='bavaria',               len=-1, loc=-1, set=0 )    # state of province name
+	x509Name.add_entry_by_txt ( field='L',            type=MBSTRING_ASC, entry='munich',                len=-1, loc=-1, set=0 )    # locality name
+	x509Name.add_entry_by_txt ( field='O',            type=MBSTRING_ASC, entry='sbs',                   len=-1, loc=-1, set=0 )    # organization name
+	x509Name.add_entry_by_txt ( field='OU',           type=MBSTRING_ASC, entry='it-department',         len=-1, loc=-1, set=0 )    # organizational unit name
+	x509Name.add_entry_by_txt ( field='CN',           type=MBSTRING_ASC, entry='Certificate Authority', len=-1, loc=-1, set=0 )    # common name
+	x509Name.add_entry_by_txt ( field='Email',        type=MBSTRING_ASC, entry='admin@localhost',       len=-1, loc=-1, set=0 )    # pkcs9 email address
+	x509Name.add_entry_by_txt ( field='emailAddress', type=MBSTRING_ASC, entry='admin@localhost',       len=-1, loc=-1, set=0 )    # pkcs9 email address
+	x509Certificate.set_issuer_name( x509Name )
+	x509Certificate.sign( pkey=pkey, md='sha1' )
+	x509Certificate.save(dirn + '/public.pem')
+	
 
 ## simple wrapper for session stuff
 class SessionService(object):
