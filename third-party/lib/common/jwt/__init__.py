@@ -26,7 +26,6 @@ signing_methods = {
 }
 
 def signwithkey(msg, privatekey):
-    print 'TO SIGN: ' + msg
     key = EVP.load_key(privatekey)
     key.reset_context(md='sha256')
     key.sign_init()
@@ -54,14 +53,13 @@ def encode(payload, key, algorithm='HS256'):
     segments.append(base64url_encode(json.dumps(payload)))
     signing_input = '.'.join(segments)
     try:
-        if algorithm == 'RS265':
+        if algorithm == 'RS256':
             ascii_key = key
         else:
             ascii_key = unicode(key).encode('utf8')
         signature = signing_methods[algorithm](signing_input, key)
     except KeyError:
         raise NotImplementedError("Algorithm not supported")
-    print 'SIGN BASE: ' + base64url_encode(signature)
     segments.append(base64url_encode(signature))
     return '.'.join(segments)
 

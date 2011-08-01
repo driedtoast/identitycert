@@ -18,7 +18,6 @@ def log(loglevel, logfilename):
 
 
 def encodeXml(obj):
-  print obj.toxml()
   return base64.urlsafe_b64encode(obj.toxml()).replace('=','')
 
 def getBase64EncodedXML(obj):
@@ -27,35 +26,32 @@ def getBase64EncodedXML(obj):
 
 def insertEnvelopedSignature(unsignedSAMLResponse, responseId, privatekey):
   doc = xml.dom.minidom.Document()
-  signatureElement = doc.createElementNS("http://www.w3.org/2000/09/xmldsig#", "Signature")
-  signedInfoElement = doc.createElement("SignedInfo")
-  canonicalizationMethodElement = doc.createElement("CanonicalizationMethod")
+  signatureElement = doc.createElementNS("http://www.w3.org/2000/09/xmldsig#", "ds:Signature")
+  signatureElement.setAttribute("xmlns:ds","http://www.w3.org/2000/09/xmldsig#")
+  signedInfoElement = doc.createElement("ds:SignedInfo")
+  canonicalizationMethodElement = doc.createElement("ds:CanonicalizationMethod")
   canonicalizationMethodElement.setAttribute("Algorithm","http://www.w3.org/2001/10/xml-exc-c14n#")
-
-  signatureMethodElement = doc.createElement("SignatureMethod")
+  signedInfoElement.appendChild(canonicalizationMethodElement)
+  signatureMethodElement = doc.createElement("ds:SignatureMethod")
   signatureMethodElement.setAttribute("Algorithm","http://www.w3.org/2000/09/xmldsig#rsa-sha1")
-
-  referenceElement = doc.createElement("Reference")
-  referenceElement.setAttribute("URI", "#" + responseId)
- 
-  transformsElement = doc.createElement("Transforms")
-  transformElement1 = doc.createElement("Transform")
-  transformElement1.setAttribute("Algorithm","http://www.w3.org/2000/09/xmldsig#enveloped-signature")
- 
-  transformElement2 = doc.createElement("Transform")
-  transformElement2.setAttribute("Algorithm","http://www.w3.org/2001/10/xml-exc-c14n#")
+  signedInfoElement.appendChild(signatureMethodElement)
   
+  referenceElement = doc.createElement("ds:Reference")
+  referenceElement.setAttribute("URI", "#" + responseId)
+  signedInfoElement.appendChild(referenceElement)
+ 
+  transformsElement = doc.createElement("ds:Transforms")
+  transformElement1 = doc.createElement("ds:Transform")
+  transformElement1.setAttribute("Algorithm","http://www.w3.org/2000/09/xmldsig#enveloped-signature")
   referenceElement.appendChild(transformsElement)
   transformsElement.appendChild(transformElement1)
-  transformsElement.appendChild(transformElement2)
 
-  digestMethodElement = doc.createElement("DigestMethod")
+  digestMethodElement = doc.createElement("ds:DigestMethod")
   digestMethodElement.setAttribute("Algorithm","http://www.w3.org/2000/09/xmldsig#sha1")
-  
   referenceElement.appendChild(digestMethodElement)
  
   # Perform the actual hashing
-  digestValueElement = doc.createElement("DigestValue")
+  digestValueElement = doc.createElement("ds:DigestValue")
   hash = hashlib.sha1()
   hash.update(unsignedSAMLResponse.toxml())
  
@@ -63,7 +59,7 @@ def insertEnvelopedSignature(unsignedSAMLResponse, responseId, privatekey):
   digestValueElement.appendChild(digestValue)
   referenceElement.appendChild(digestValueElement)
 
-  signatureValueElement = doc.createElement("SignatureValue")
+  signatureValueElement = doc.createElement("ds:SignatureValue")
   m = M2Crypto.RSA.load_key_string(privatekey)
   signature = m.sign(hash.digest(),"sha1")
  
@@ -84,11 +80,11 @@ def insertCertificate(elementRoot, certificate):
   doc = xml.dom.minidom.Document()
 
   # Pull the <signature> element
-  signatureElement = elementRoot.getElementsByTagName("Signature").item(0)
+  signatureElement = elementRoot.getElementsByTagName("ds:Signature").item(0)
  
-  keyInfoElement = doc.createElement("KeyInfo")
-  x509DataElement = doc.createElement("X509Data")
-  x509CertificateElement = doc.createElement("X509Certificate")
+  keyInfoElement = doc.createElement("ds:KeyInfo")
+  x509DataElement = doc.createElement("ds:X509Data")
+  x509CertificateElement = doc.createElement("ds:X509Certificate")
 
 
   # Parse the certificate text into an M2Crypto X509 certificate object
