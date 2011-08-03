@@ -8,8 +8,9 @@ if [ -f "/etc/rc.d/init.d/functions" ]; then
 fi
 
 SUDO_CMD=""
-if [ `whoami` ne "root" ]; then
-	$SUDO_CMD="sudo "
+if [ `whoami` !=  "root" ]; then
+	echo "not root"
+	SUDO_CMD="sudo"
 fi
 
 if [ ! $BASE_DIR ]; then
@@ -22,18 +23,18 @@ fi
 CONFIG_DIR=$BASE_DIR/$CONFIG_DIR
 echo "Loading config from $CONFIG_DIR"
 echo "Starting with base directory $BASE_DIR"
+echo "Sudo command: $SUDO_CMD"
 
-
-$SUDO_CMD $PKG_MGR install python-setuptools
+$SUDO_CMD $PKG_MGR install -y python-setuptools
 PRG_CHK=`which swig`
 if [ ! $PRG_CHK ]; then
-    $SUDO_CMD $PKG_MGR install swig
+    $SUDO_CMD $PKG_MGR install -y swig
 fi
 if [ $PKG_MGR = "apt-get" ]; then 
-    $SUDO_CMD $PKG_MGR install python-m2crypto
-    $SUDO_CMD $PKG_MGR install python-openssl
-    $SUDO_CMD $PKG_MGR install python-libxml2
-    $SUDO_CMD $PKG_MGR install libxmlsec1-dev
+    $SUDO_CMD $PKG_MGR install -y python-m2crypto
+    $SUDO_CMD $PKG_MGR install -y python-openssl
+    $SUDO_CMD $PKG_MGR install -y python-libxml2
+    $SUDO_CMD $PKG_MGR install -y libxmlsec1-dev
 fi
 
 
