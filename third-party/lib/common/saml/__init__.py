@@ -6,7 +6,9 @@ import M2Crypto
 import base64
 import StringIO
 import logging
-
+from lib.xml import c14n
+import saml2
+from saml2 import utils as samlutils
 
 import saml.SAMLMessages as SAMLMessages
 
@@ -18,6 +20,7 @@ def log(loglevel, logfilename):
 
 
 def encodeXml(obj):
+  print obj.toxml()
   return base64.urlsafe_b64encode(obj.toxml()).replace('=','')
 
 def getBase64EncodedXML(obj):
@@ -52,6 +55,11 @@ def insertEnvelopedSignature(unsignedSAMLResponse, responseId, privatekey):
  
   # Perform the actual hashing
   digestValueElement = doc.createElement("ds:DigestValue")
+  key = M2Crypto.EVP.load_key_string(privatekey)
+  key.reset_context(md='sha1')
+  key.sign_init()
+  key.sign_update(unsignedSAMLResponse.toxml())
+  
   hash = hashlib.sha1()
   hash.update(unsignedSAMLResponse.toxml())
  
@@ -60,10 +68,10 @@ def insertEnvelopedSignature(unsignedSAMLResponse, responseId, privatekey):
   referenceElement.appendChild(digestValueElement)
 
   signatureValueElement = doc.createElement("ds:SignatureValue")
-  m = M2Crypto.RSA.load_key_string(privatekey)
-  signature = m.sign(hash.digest(),"sha1")
+  # m = M2Crypto.RSA.load_key_string(privatekey)
+  #signature = m.sign(hash.digest(),"sha1")
  
-  signatureValueText = doc.createTextNode(base64.b64encode(signature))
+  signatureValueText = doc.createTextNode(base64.b64encode(key.sign_final()))
   signatureValueElement.appendChild(signatureValueText)
 
   signatureElement.appendChild(signedInfoElement)
@@ -83,25 +91,25 @@ def insertCertificate(elementRoot, certificate):
   signatureElement = elementRoot.getElementsByTagName("ds:Signature").item(0)
  
   keyInfoElement = doc.createElement("ds:KeyInfo")
-  x509DataElement = doc.createElement("ds:X509Data")
-  x509CertificateElement = doc.createElement("ds:X509Certificate")
-
-
+  keyValueElement = doc.createElement("ds:X509Data")
+  keyInfoElement.appendChild(keyValueElement)
+  certificateElement = doc.createElement("ds:X509Certificate")
+  
   # Parse the certificate text into an M2Crypto X509 certificate object
+  
   x509CertObject = M2Crypto.X509.load_cert_string(certificate)
-
   # Remove the "-----BEGIN CERTIFICATE-----" and "-----END CERTIFICATE-----"
   # and clean up any leading and trailing whitespace
-  certificatePEM = x509CertObject.as_pem()
+  certificatePEM = certificate # x509CertObject.as_der()
+  print certificatePEM
   certificatePEM = certificatePEM.replace("-----BEGIN CERTIFICATE-----","")
   certificatePEM = certificatePEM.replace("-----END CERTIFICATE-----","")
   certificatePEM = certificatePEM.strip()
 
   x509CertificateText = doc.createTextNode(certificatePEM)
 
-  x509CertificateElement.appendChild(x509CertificateText)
-  x509DataElement.appendChild(x509CertificateElement)
-  keyInfoElement.appendChild(x509DataElement)
+  certificateElement.appendChild(x509CertificateText)
+  keyValueElement.appendChild(certificateElement)
   signatureElement.appendChild(keyInfoElement)
   elementRoot.appendChild(signatureElement)
   return elementRoot
@@ -292,9 +300,16 @@ class Assertion(object):
     return assertionElement
   def sign(self,privateKey,certificate):
     xmlNode = self.getXMLNode(certificate)
+    pkey = open(privateKey, 'r').read()
+    print samlutils.sign(xmlNode.toxml(),privateKey)
+    
+    xmlStr = c14n.Canonicalize(xmlNode, unsuppressedPrefixes=None)
+    print xmlStr
+    xmlNode = xml.dom.minidom.parseString(xmlStr).documentElement
+    
     # If a private key was specified sign the response
-    if ( privateKey != None ):
-      xmlNode = insertEnvelopedSignature(xmlNode,self.assertionUUID,privateKey)
+    if ( pkey != None ):
+      xmlNode = insertEnvelopedSignature(xmlNode,self.assertionUUID,pkey)
    
     # Add a certificate if it was specified
     if ( certificate != None ):
