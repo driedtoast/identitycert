@@ -151,7 +151,7 @@ def oauth2_bearerflow_submit():
             values.update(request_token)
 	elif token_type == 'saml' and keysign:
 	    assertion = saml2.service.buildAssertion(username, audience, client_id, callback)
-	    secret = saml2.service.encodeAssertion(assertion,privateKey.read(), publicKey.read())
+	    secret = saml2.service.encodeAssertion(assertion,setup.keydir  +'/' + keyname + '/private.pem', setup.keydir  +'/' + keyname + '/public.pem')
 	    request_token = oauth2.service.request_token_call(secret,'urn:oasis:names:tc:SAML:2.0:assertion',assertion_type='SAML')
             values.update(request_token)
 	else:
