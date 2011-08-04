@@ -301,9 +301,9 @@ class Assertion(object):
   def sign(self,privateKey,certificate):
     xmlNode = self.getXMLNode(certificate)
     pkey = open(privateKey, 'r').read()
-    print samlutils.sign(xmlNode.toxml(),privateKey)
+    ## print samlutils.sign(xmlNode.toxml(),privateKey)
     
-    xmlStr = c14n.Canonicalize(xmlNode, unsuppressedPrefixes=None)
+    xmlStr = c14n.Canonicalize(xmlNode, unsuppressedPrefixes=[])
     print xmlStr
     xmlNode = xml.dom.minidom.parseString(xmlStr).documentElement
     
