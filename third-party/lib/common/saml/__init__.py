@@ -105,6 +105,7 @@ def insertCertificate(elementRoot, certificate):
   certificatePEM = certificatePEM.replace("-----BEGIN CERTIFICATE-----","")
   certificatePEM = certificatePEM.replace("-----END CERTIFICATE-----","")
   certificatePEM = certificatePEM.strip()
+  certificatePEM = ''.join(certificatePEM.splitlines())
 
   x509CertificateText = doc.createTextNode(certificatePEM)
 
