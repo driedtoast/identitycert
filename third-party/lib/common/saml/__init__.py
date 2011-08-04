@@ -20,7 +20,6 @@ def log(loglevel, logfilename):
 
 
 def encodeXml(obj):
-  print obj.toxml()
   return base64.urlsafe_b64encode(obj.toxml()).replace('=','')
 
 def getBase64EncodedXML(obj):
@@ -29,6 +28,8 @@ def getBase64EncodedXML(obj):
 
 def insertEnvelopedSignature(unsignedSAMLResponse, responseId, privatekey):
   doc = xml.dom.minidom.Document()
+  canonicalResponse = c14n.Canonicalize(unsignedSAMLResponse, unsuppressedPrefixes=[])
+  
   signatureElement = doc.createElementNS("http://www.w3.org/2000/09/xmldsig#", "ds:Signature")
   signatureElement.setAttribute("xmlns:ds","http://www.w3.org/2000/09/xmldsig#")
   signedInfoElement = doc.createElement("ds:SignedInfo")
@@ -58,10 +59,10 @@ def insertEnvelopedSignature(unsignedSAMLResponse, responseId, privatekey):
   key = M2Crypto.EVP.load_key_string(privatekey)
   key.reset_context(md='sha1')
   key.sign_init()
-  key.sign_update(unsignedSAMLResponse.toxml())
+  key.sign_update(canonicalResponse)
   
   hash = hashlib.sha1()
-  hash.update(unsignedSAMLResponse.toxml())
+  hash.update(canonicalResponse)
  
   digestValue = doc.createTextNode(base64.b64encode(hash.digest()))
   digestValueElement.appendChild(digestValue)
@@ -101,7 +102,6 @@ def insertCertificate(elementRoot, certificate):
   # Remove the "-----BEGIN CERTIFICATE-----" and "-----END CERTIFICATE-----"
   # and clean up any leading and trailing whitespace
   certificatePEM = certificate # x509CertObject.as_der()
-  print certificatePEM
   certificatePEM = certificatePEM.replace("-----BEGIN CERTIFICATE-----","")
   certificatePEM = certificatePEM.replace("-----END CERTIFICATE-----","")
   certificatePEM = certificatePEM.strip()
@@ -188,7 +188,7 @@ class Subject(object):
     self.confirmationMethod = confirmationMethod
     self.recipient = recipient
     if(notOnOrAfter == None):
-      self.notOnOrAfter = time.strftime("%Y-%m-%dT%H:%M:%SZ",time.gmtime(time.time() + 60))
+      self.notOnOrAfter = time.strftime("%Y-%m-%dT%H:%M:%SZ",time.gmtime(time.time() + 120))
     else:
       self.notOnOrAfter = notOnOrAfter
 
@@ -304,9 +304,9 @@ class Assertion(object):
     pkey = open(privateKey, 'r').read()
     ## print samlutils.sign(xmlNode.toxml(),privateKey)
     
-    xmlStr = c14n.Canonicalize(xmlNode, unsuppressedPrefixes=[])
-    print xmlStr
-    xmlNode = xml.dom.minidom.parseString(xmlStr).documentElement
+    #xmlStr = c14n.Canonicalize(xmlNode, unsuppressedPrefixes=[])
+    
+    #xmlNode = xml.dom.minidom.parseString(xmlStr).documentElement
     
     # If a private key was specified sign the response
     if ( pkey != None ):

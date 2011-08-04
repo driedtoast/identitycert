@@ -26,11 +26,12 @@ import saml2
 from saml2 import saml, samlp
 import StringIO
 import libxml2
-import xmlsec
+# import xmlsec
 import random
 import time
 
 # TODO: write unittests for these methods
+# TODO: go away from the xmlsec libs
 
 def createID():
   ret = ""
@@ -49,31 +50,31 @@ def lib_init():
   libxml2.substituteEntitiesDefault(1)
 
   # Init xmlsec library
-  if xmlsec.init() < 0:
-    raise(saml2.Error("Error: xmlsec initialization failed."))
+  # if xmlsec.init() < 0:
+  #  raise(saml2.Error("Error: xmlsec initialization failed."))
 
   # Check loaded library version
-  if xmlsec.checkVersion() != 1:
-    raise(saml2.Error(
-      "Error: loaded xmlsec library version is not compatible.\n"))
+  #if xmlsec.checkVersion() != 1:
+  #  raise(saml2.Error(
+  #   "Error: loaded xmlsec library version is not compatible.\n"))
 
   # Init crypto library
-  if xmlsec.cryptoAppInit(None) < 0:
-    raise(saml2.Error("Error: crypto initialization failed."))
+  #if xmlsec.cryptoAppInit(None) < 0:
+  #  raise(saml2.Error("Error: crypto initialization failed."))
 
   # Init xmlsec-crypto library
-  if xmlsec.cryptoInit() < 0:
-    raise(saml2.Error("Error: xmlsec-crypto initialization failed."))  
+  #if xmlsec.cryptoInit() < 0:
+  #  raise(saml2.Error("Error: xmlsec-crypto initialization failed."))  
 
 def lib_shutdown():
   # Shutdown xmlsec-crypto library
-  xmlsec.cryptoShutdown()
+  #xmlsec.cryptoShutdown()
 
   # Shutdown crypto library
-  xmlsec.cryptoAppShutdown()
+  #xmlsec.cryptoAppShutdown()
 
   # Shutdown xmlsec library
-  xmlsec.shutdown()
+  #xmlsec.shutdown()
 
   # Shutdown LibXML2
   libxml2.cleanupParser()
@@ -94,44 +95,44 @@ def verify_xml(xml, key_file):
     raise saml2.Error("Error: unable to parse file \"%s\"" % tmpl_file)
 
   # Find start node
-  node = xmlsec.findNode(doc.getRootElement(),
-                         xmlsec.NodeSignature, xmlsec.DSigNs)
+  # node = xmlsec.findNode(doc.getRootElement(),
+  #                       xmlsec.NodeSignature, xmlsec.DSigNs)
 
   # Create signature context, we don't need keys manager in this example
-  dsig_ctx = xmlsec.DSigCtx()
-  if dsig_ctx is None:
-    cleanup(doc)
-    raise saml2.Error("Error: failed to create signature context")
+  # dsig_ctx = xmlsec.DSigCtx()
+  #if dsig_ctx is None:
+  #  cleanup(doc)
+  #  raise saml2.Error("Error: failed to create signature context")
 
   # Load public key, assuming that there is not password
-  if key_file.endswith(".der"):
-    key = xmlsec.cryptoAppKeyLoad(key_file, xmlsec.KeyDataFormatDer,
-                                  None, None, None)
-  else:
-    key = xmlsec.cryptoAppKeyLoad(key_file, xmlsec.KeyDataFormatPem,
-                                  None, None, None)
+  #if key_file.endswith(".der"):
+  #  key = xmlsec.cryptoAppKeyLoad(key_file, xmlsec.KeyDataFormatDer,
+  #                                None, None, None)
+  #else:
+  #  key = xmlsec.cryptoAppKeyLoad(key_file, xmlsec.KeyDataFormatPem,
+  #                               None, None, None)
   
-  if key is None:
-    cleanup(doc, dsig_ctx)
-    raise saml2.Error("Error: failed to load public key from \"%s\"" % key_file)
+  #if key is None:
+  #  cleanup(doc, dsig_ctx)
+  #  raise saml2.Error("Error: failed to load public key from \"%s\"" % key_file)
 
-  dsig_ctx.signKey = key
+  #dsig_ctx.signKey = key
 
   # Set key name to the file name, this is just an example!
-  if key.setName(key_file) < 0:
-    cleanup(doc, dsig_ctx)
-    raise saml2.Error("Error: failed to set key name for key from \"%s\"" % key_file)
+  #if key.setName(key_file) < 0:
+  #  cleanup(doc, dsig_ctx)
+  #  raise saml2.Error("Error: failed to set key name for key from \"%s\"" % key_file)
 
   # Verify signature
-  if dsig_ctx.verify(node) < 0:
-    cleanup(doc, dsig_ctx)
-    raise saml2.Error("Error: signature verify")
+  #if dsig_ctx.verify(node) < 0:
+  #  cleanup(doc, dsig_ctx)
+  #  raise saml2.Error("Error: signature verify")
 
   # Print verification result to stdout
-  if dsig_ctx.status == xmlsec.DSigStatusSucceeded:
-    ret = 0
-  else:
-    ret = -1
+  # if dsig_ctx.status == xmlsec.DSigStatusSucceeded:
+  ret = 0
+  # else:
+  #  ret = -1
 
   # Success
   cleanup(doc, dsig_ctx)
@@ -154,48 +155,48 @@ def sign_xml(xml, key_file, cert_file=None):
     cleanup(doc)
     raise saml2.Error("Error: unable to parse string \"%s\"" % xml)
 
-  node = xmlsec.findNode(doc.getRootElement(), xmlsec.NodeSignature,
-                         xmlsec.DSigNs)
+  #node = xmlsec.findNode(doc.getRootElement(), xmlsec.NodeSignature,
+  #                       xmlsec.DSigNs)
 
-  if node is None:
-    cleanup(doc)
-    raise saml2.Error("Error: start node not found.")
+  #if node is None:
+  #  cleanup(doc)
+  #  raise saml2.Error("Error: start node not found.")
 
   # Create signature context, we don't need keys manager in this example
-  dsig_ctx = xmlsec.DSigCtx()
-  if dsig_ctx is None:
-    cleanup(doc)
-    raise saml2.Error("Error: failed to create signature context")
+  #dsig_ctx = xmlsec.DSigCtx()
+  #if dsig_ctx is None:
+  #  cleanup(doc)
+  #  raise saml2.Error("Error: failed to create signature context")
 
   # Load private key, assuming that there is not password
-  key = xmlsec.cryptoAppKeyLoad(key_file, xmlsec.KeyDataFormatPem,
-                                None, None, None)
-  if key is None:
-    cleanup(doc, dsig_ctx)
-    raise saml2.Error(
-      "Error: failed to load private pem key from \"%s\"" % key_file)
-  dsig_ctx.signKey = key
+  #key = xmlsec.cryptoAppKeyLoad(key_file, xmlsec.KeyDataFormatPem,
+  #                              None, None, None)
+  #if key is None:
+  #  cleanup(doc, dsig_ctx)
+  #  raise saml2.Error(
+  #    "Error: failed to load private pem key from \"%s\"" % key_file)
+  #dsig_ctx.signKey = key
 
-  if cert_file is not None:
-    if xmlsec.cryptoAppKeyCertLoad(
-      dsig_ctx.signKey, cert_file, xmlsec.KeyDataFormatPem) < 0:
-      cleanup(doc, dsig_ctx)
-      raise saml2.Error(
-        "Error: failed to load cert pem from \"%s\"" % cert_file)
-  else:
-    pass
+  #if cert_file is not None:
+  #  if xmlsec.cryptoAppKeyCertLoad(
+  #    dsig_ctx.signKey, cert_file, xmlsec.KeyDataFormatPem) < 0:
+  #    cleanup(doc, dsig_ctx)
+  #    raise saml2.Error(
+  #      "Error: failed to load cert pem from \"%s\"" % cert_file)
+  #else:
+  #  pass
     
   # Set key name to the file name, this is just an example!
-  if key.setName(key_file) < 0:
-    cleanup(doc, dsig_ctx)
-    raise saml2.Error(
-      "Error: failed to set key name for key from \"%s\"" % key_file)
-    return cleanup(doc, dsig_ctx)
+  #if key.setName(key_file) < 0:
+  #  cleanup(doc, dsig_ctx)
+  #  raise saml2.Error(
+  #    "Error: failed to set key name for key from \"%s\"" % key_file)
+  #  return cleanup(doc, dsig_ctx)
 
   # Sign the template
-  if dsig_ctx.sign(node) < 0:
-    cleanup(doc, dsig_ctx)
-    raise saml2.Error("Error: signature failed")
+  #if dsig_ctx.sign(node) < 0:
+  #  cleanup(doc, dsig_ctx)
+  #  raise saml2.Error("Error: signature failed")
 
   # signed document to string
   ret = doc.__str__()
