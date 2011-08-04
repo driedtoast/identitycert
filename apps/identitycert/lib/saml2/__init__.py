@@ -24,10 +24,10 @@ class SamlService(object):
         return SAML.Assertion(authStatement, clientid, conditions)
     ## encodes in base 64 url
     def encodeAssertion(self,assertion, privatekey, certificate):
-        result = xml.signXml(assertion.getXMLNode(certificate).toxml(), privatekey, certificate,'#'+assertion.assertionUUID)
-        return jwt.base64url_encode(result)
-        # node=assertion.sign(privatekey,certificate)
-        #return SAML.encodeXml(node)
+        #result = xml.signXml(assertion.getXMLNode(certificate).toxml(), privatekey, certificate,'#'+assertion.assertionUUID)
+        #return jwt.base64url_encode(result)
+        node=assertion.sign(privatekey,certificate)
+        return SAML.encodeXml(node)
 
 
 service = SamlService()
