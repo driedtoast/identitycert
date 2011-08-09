@@ -8,6 +8,7 @@ import StringIO
 import logging
 from lib.xml import c14n
 import saml2
+from binascii import hexlify
 from saml2 import utils as samlutils
 
 import saml.SAMLMessages as SAMLMessages
@@ -20,6 +21,7 @@ def log(loglevel, logfilename):
 
 
 def encodeXml(obj):
+  print obj.toxml()
   return base64.urlsafe_b64encode(obj.toxml()).replace('=','')
 
 def getBase64EncodedXML(obj):
@@ -27,6 +29,7 @@ def getBase64EncodedXML(obj):
   return base64string
 
 def insertEnvelopedSignature(unsignedSAMLResponse, responseId, privatekey):
+  print privatekey
   doc = xml.dom.minidom.Document()
   canonicalResponse = c14n.Canonicalize(unsignedSAMLResponse, unsuppressedPrefixes=[])
   
@@ -56,15 +59,20 @@ def insertEnvelopedSignature(unsignedSAMLResponse, responseId, privatekey):
  
   # Perform the actual hashing
   digestValueElement = doc.createElement("ds:DigestValue")
-  key = M2Crypto.EVP.load_key_string(privatekey)
-  key.reset_context(md='sha1')
-  key.sign_init()
-  key.sign_update(canonicalResponse)
   
   hash = hashlib.sha1()
   hash.update(canonicalResponse)
- 
-  digestValue = doc.createTextNode(base64.b64encode(hash.digest()))
+  digestValue = hash.digest()
+  
+  key = M2Crypto.EVP.load_key_string(privatekey)
+  # sigValue = key.get_rsa().sign(digestValue)
+  key.reset_context(md='sha1')
+  key.sign_init()
+  key.sign_update(canonicalResponse)
+  sigValue = key.sign_final()
+  
+  
+  digestValue = doc.createTextNode(base64.b64encode(digestValue))
   digestValueElement.appendChild(digestValue)
   referenceElement.appendChild(digestValueElement)
 
@@ -72,7 +80,7 @@ def insertEnvelopedSignature(unsignedSAMLResponse, responseId, privatekey):
   # m = M2Crypto.RSA.load_key_string(privatekey)
   #signature = m.sign(hash.digest(),"sha1")
  
-  signatureValueText = doc.createTextNode(base64.b64encode(key.sign_final()))
+  signatureValueText = doc.createTextNode(base64.b64encode(sigValue))
   signatureValueElement.appendChild(signatureValueText)
 
   signatureElement.appendChild(signedInfoElement)
@@ -93,12 +101,22 @@ def insertCertificate(elementRoot, certificate):
  
   keyInfoElement = doc.createElement("ds:KeyInfo")
   keyValueElement = doc.createElement("ds:X509Data")
+  # keyValueElement = doc.createElement("ds:KeyValue")
   keyInfoElement.appendChild(keyValueElement)
   certificateElement = doc.createElement("ds:X509Certificate")
+  #certificateElement = doc.createElement("ds:RSAKeyValue")
+  #modulusElement = doc.createElement("ds:Modulus")
+  #exponentElement = doc.createElement("ds:Exponent")
+  #certificateElement.appendChild(modulusElement)
+  # certificateElement.appendChild(exponentElement)
+  
+  # 	<ds:Exponent>AQAB</ds:Exponent>
   
   # Parse the certificate text into an M2Crypto X509 certificate object
   
-  x509CertObject = M2Crypto.X509.load_cert_string(certificate)
+  # x509CertObject = M2Crypto.X509.load_cert_string(certificate)
+  # pk = x509CertObject.get_pubkey()
+  
   # Remove the "-----BEGIN CERTIFICATE-----" and "-----END CERTIFICATE-----"
   # and clean up any leading and trailing whitespace
   certificatePEM = certificate # x509CertObject.as_der()
@@ -108,8 +126,12 @@ def insertCertificate(elementRoot, certificate):
   certificatePEM = ''.join(certificatePEM.splitlines())
 
   x509CertificateText = doc.createTextNode(certificatePEM)
-
   certificateElement.appendChild(x509CertificateText)
+  
+  # modulusValue = base64.b64encode(hexlify(pk.get_modulus()))
+  # modulusElement.appendChild(doc.createTextNode(modulusValue))
+  # exponentElement.appendChild(doc.createTextNode('AQAB'))
+
   keyValueElement.appendChild(certificateElement)
   signatureElement.appendChild(keyInfoElement)
   elementRoot.appendChild(signatureElement)
@@ -302,6 +324,7 @@ class Assertion(object):
   def sign(self,privateKey,certificate):
     xmlNode = self.getXMLNode(certificate)
     pkey = open(privateKey, 'r').read()
+   
     ## print samlutils.sign(xmlNode.toxml(),privateKey)
     
     #xmlStr = c14n.Canonicalize(xmlNode, unsuppressedPrefixes=[])
