@@ -39,7 +39,7 @@ class KeyService(object):
 	# args = ['openssl','x509','-in',dirn + '/public.pem','-out',dirn + '/public_der.pem','-outform','der']
 	# subprocess.call(args)
 	pkey = crypto.PKey()
-	pkey.generate_key(crypto.TYPE_RSA, 1024)
+	pkey.generate_key(crypto.TYPE_RSA, 512)
         digest='md5'
        
 	req = crypto.X509Req()
@@ -134,7 +134,11 @@ class SessionService(object):
         sess = self.get_session()
         sess[name] = value
         sess.save()
-
+    def clear_attr(self,names):
+	sess = self.get_session()
+	for name in names:
+	    if name in sess:
+	        del sess[name]
 
 def get_file(name):
     #try:

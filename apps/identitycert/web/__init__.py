@@ -117,6 +117,8 @@ def oauth2_bearerflow():
 @route('/oauth2/bearerflow/submit',method='POST')
 @view('oauth2/callback')
 def oauth2_bearerflow_submit():
+    ## clean out the values, hmm beaker might need to be invalidated	
+    services.session.clear_attr(['error','access_token','refresh_token','error_description','state','code'])
     values = dict(name='oauth 2 bearer submit flow')
     token_type = services.get_param('token_type')
     if token_type != None:
