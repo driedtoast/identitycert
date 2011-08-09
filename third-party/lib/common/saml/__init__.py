@@ -165,11 +165,11 @@ class Conditions(object):
     conditionsElement.setAttribute("NotBefore", self.notBefore)
     conditionsElement.setAttribute("NotOnOrAfter", self.notOnOrAfter)
     if(self.audience != None):
-      audienceRestrictElement = doc.createElement("AudienceRestriction")
+      # audienceRestrictElement = doc.createElement("AudienceRestriction")
       audienceElement  = doc.createElement("Audience")
       audienceElement.appendChild(doc.createTextNode(self.audience))
-      audienceRestrictElement.appendChild(audienceElement)
-      conditionsElement.appendChild(audienceRestrictElement)
+      # audienceRestrictElement.appendChild(audienceElement)
+      conditionsElement.appendChild(audienceElement)
       
     return conditionsElement    
     
@@ -233,11 +233,11 @@ class Subject(object):
     subjectConfirmationElement = doc.createElement("SubjectConfirmation")
     if (self.confirmationMethod != None):
       subjectConfirmationElement.setAttribute("Method",self.confirmationMethod)
+    subjectConfirmData = doc.createElement("SubjectConfirmationData")
     if (self.recipient != None):
-      subjectConfirmData = doc.createElement("SubjectConfirmationData")
       subjectConfirmData.setAttribute("Recipient",self.recipient)
-      subjectConfirmData.setAttribute("NotOnOrAfter",self.notOnOrAfter)
-      subjectConfirmationElement.appendChild(subjectConfirmData)
+    subjectConfirmData.setAttribute("NotOnOrAfter",self.notOnOrAfter)
+    subjectConfirmationElement.appendChild(subjectConfirmData)
     subjectElement.appendChild(nameIDElement)
     subjectElement.appendChild(subjectConfirmationElement)
   
