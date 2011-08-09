@@ -1,6 +1,6 @@
 import xml.dom.minidom
 import uuid
-import time
+import time, datetime
 import hashlib
 import M2Crypto
 import base64
@@ -148,7 +148,7 @@ class Conditions(object):
       self.notBefore = notBefore
         
     if(notOnOrAfter == None):
-      self.notOnOrAfter = time.strftime("%Y-%m-%dT%H:%M:%SZ",time.gmtime(time.time() + 60))
+      self.notOnOrAfter = time.strftime("%Y-%m-%dT%H:%M:%SZ",time.gmtime(time.time() + datetime.timedelta(seconds=30)))
     else:
       self.notOnOrAfter = notOnOrAfter
     self.audience=audience
