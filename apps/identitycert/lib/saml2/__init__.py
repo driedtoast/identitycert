@@ -1,5 +1,7 @@
 import saml as SAML
 import time, logging
+import subprocess
+import setup, base64
 import lib.xml as xml
 import jwt
 
@@ -24,10 +26,15 @@ class SamlService(object):
         return SAML.Assertion(authStatement, clientid, conditions)
     ## encodes in base 64 url
     def encodeAssertion(self,assertion, privatekey, certificate):
-        #result = xml.signXml(assertion.getXMLNode(certificate).toxml(), privatekey, certificate,'#'+assertion.assertionUUID)
-        #return jwt.base64url_encode(result)
-        node=assertion.sign(privatekey,certificate)
-        return SAML.encodeXml(node)
+        #result = xml.signXml(assertion.getXMLNode(certificate).t xml = assertion.getXMLNode(certificate).toxml()
+        xml = base64.b64encode(xml)
+        cmd = setup.basedir +'/../CommandLineSigner/xmlsign'
+        p = subprocess.Popen([cmd,privatekey,xml],stdout=subprocess.PIPE)
+        stdout =  p.communicate()[0]
+        xml = base64.b64decode(stdout)
+        return base64.urlsafe_b64encode(xml).replace('=','')
+        #node=assertion.sign(privatekey,certificate)
+        #return SAML.encodeXml(node)
 
 
 service = SamlService()
