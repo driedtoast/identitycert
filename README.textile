@@ -11,3 +11,10 @@ h1. Getting Started
 # ./bin/resolvedepends
 # python startup.py identitycert
 
+Here comes the hackerific section related to certs:
+
+# Clone CommandLineSigner project
+# Build in eclipse (just need a class file in bin) 
+# chmod +x CommandLineSigner/xmlsign
+
+Reason for this is I needed to get xml signature compatible with java validation quickly for saml bearer, don't like it but it works.
