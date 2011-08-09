@@ -26,6 +26,7 @@ class SamlService(object):
         return SAML.Assertion(authStatement, clientid, conditions)
     ## encodes in base 64 url
     def encodeAssertion(self,assertion, privatekey, certificate):
+        xml = assertion.getXMLNode(certificate).toxml()
         #result = xml.signXml(assertion.getXMLNode(certificate).t xml = assertion.getXMLNode(certificate).toxml()
         xml = base64.b64encode(xml)
         cmd = setup.basedir +'/../CommandLineSigner/xmlsign'
