@@ -33,6 +33,7 @@ class SamlService(object):
         p = subprocess.Popen([cmd,privatekey,xml],stdout=subprocess.PIPE)
         stdout =  p.communicate()[0]
         xml = base64.b64decode(stdout)
+        print xml
         return base64.urlsafe_b64encode(xml).replace('=','')
         #node=assertion.sign(privatekey,certificate)
         #return SAML.encodeXml(node)
