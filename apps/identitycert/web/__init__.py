@@ -149,12 +149,12 @@ def oauth2_bearerflow_submit():
 		key = setup.keydir  +'/' + keyname + '/private.pem' # setup.staticdir + '/mycert-private.pem'
 		algorithm = 'RS256' 
             secret = jwt.encode(tojson,key,algorithm )
-            request_token = oauth2.service.request_token_call(secret,'http://oauth.net/grant_type/jwt/1.0/bearer',assertion_type='JWT')
+            request_token = oauth2.service.request_token_call(secret,'urn:ietf:params:oauth:grant-type:jwt-bearer',assertion_type='JWT')
             values.update(request_token)
 	elif token_type == 'saml' and keysign:
 	    assertion = saml2.service.buildAssertion(username, audience, client_id, callback)
 	    secret = saml2.service.encodeAssertion(assertion,setup.keydir  +'/' + keyname + '/private.pem', publicKey.read())#setup.keydir  +'/' + keyname + '/public.pem')
-	    request_token = oauth2.service.request_token_call(secret,'urn:oasis:names:tc:SAML:2.0:assertion',assertion_type='SAML')
+	    request_token = oauth2.service.request_token_call(secret,'urn:ietf:params:oauth:grant-type:saml2-bearer',assertion_type='SAML')
             values.update(request_token)
 	else:
 	    values = {"error":"No token type provided on form"}
